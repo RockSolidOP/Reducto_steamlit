@@ -1,0 +1,213 @@
+{
+  "duration": 21.359560012817383,
+  "job_id": "25b506b4-c559-46b2-938b-f39cfff70b80",
+  "result": {
+    "chunks": [
+      {
+        "blocks": [
+          {
+            "bbox": {
+              "height": 0.017045454545454544,
+              "left": 0.051470588235294115,
+              "page": 1,
+              "top": 0.05555555555555555,
+              "width": 0.08415032679738563,
+              "original_page": 1
+            },
+            "content": "Form 1040",
+            "type": "Header",
+            "confidence": "high",
+            "image_url": null,
+            "granular_confidence": {
+              "extract_confidence": null,
+              "parse_confidence": null
+            }
+          },
+          {
+            "bbox": {
+              "height": 0.013888888888888888,
+              "left": 0.18218954248366012,
+              "page": 1,
+              "top": 0.058712121212121215,
+              "width": 0.6160130718954249,
+              "original_page": 1
+            },
+            "content": "FinCEN 114 - Report of Foreign Bank and Financial Accounts, Page 1",
+            "type": "Title",
+            "confidence": "high",
+            "image_url": null,
+            "granular_confidence": {
+              "extract_confidence": null,
+              "parse_confidence": null
+            }
+          },
+          {
+            "bbox": {
+              "height": 0.010732323232323232,
+              "left": 0.8570261437908496,
+              "page": 1,
+              "top": 0.05808080808080808,
+              "width": 0.04656862745098039,
+              "original_page": 1
+            },
+            "content": "2024",
+            "type": "Header",
+            "confidence": "high",
+            "image_url": null,
+            "granular_confidence": {
+              "extract_confidence": null,
+              "parse_confidence": null
+            }
+          },
+          {
+            "bbox": {
+              "height": 0.03731845123599274,
+              "left": 0.02592713069292455,
+              "page": 1,
+              "top": 0.09020358384257615,
+              "width": 0.766500430948594,
+              "original_page": 1
+            },
+            "content": "Name: Fname GenInfo\nTaxpayer ID: 123-",
+            "type": "Key Value",
+            "confidence": "high",
+            "image_url": null,
+            "granular_confidence": {
+              "extract_confidence": null,
+              "parse_confidence": null
+            }
+          },
+          {
+            "bbox": {
+              "height": 0.026515151515151516,
+              "left": 0.20016339869281047,
+              "page": 1,
+              "top": 0.13636363636363635,
+              "width": 0.5612745098039216,
+              "original_page": 1
+            },
+            "content": "Warning: Printed versions of the BSA E-Filing forms are not for submission and will not be processed by FinCEN",
+            "type": "Text",
+            "confidence": "high",
+            "image_url": null,
+            "granular_confidence": {
+              "extract_confidence": null,
+              "parse_confidence": null
+            }
+          },
+          {
+            "bbox": {
+              "height": 0.022727272727272728,
+              "left": 0.7475490196078431,
+              "page": 1,
+              "top": 0.09154040404040405,
+              "width": 0.17565359477124182,
+              "original_page": 1
+            },
+            "content": "Taxpayer Identification Number: 123-65-4987",
+            "type": "Text",
+            "confidence": "high",
+            "image_url": null,
+            "granular_confidence": {
+              "extract_confidence": null,
+              "parse_confidence": null
+            }
+          },
+          {
+            "bbox": {
+              "height": 0.008838383838383838,
+              "left": 0.12009803921568628,
+              "page": 1,
+              "top": 0.18371212121212122,
+              "width": 0.7777777777777778,
+              "original_page": 1
+            },
+            "content": "Spaces and dashes have been removed from identification numbers and postal codes where required for FinCEN electronic filing.",
+            "type": "Text",
+            "confidence": "high",
+            "image_url": null,
+            "granular_confidence": {
+              "extract_confidence": null,
+              "parse_confidence": null
+            }
+          },
+          {
+            "bbox": {
+              "height": 0.04706698716288865,
+              "left": 0.03820573270710465,
+              "page": 1,
+              "top": 0.20930789215396148,
+              "width": 0.8770645054337246,
+              "original_page": 1
+            },
+            "content": "1 This report is for calendar year ended 12/31/: 2024\n\nAmended: [ ]\nPrior report BSA Identifier: <empty>\n\nReason if filing late: <empty>",
+            "type": "Key Value",
+            "confidence": "high",
+            "image_url": null,
+            "granular_confidence": {
+              "extract_confidence": null,
+              "parse_confidence": null
+            }
+          }
+        ],
+        "content": "Form 1040\n\n# FinCEN 114 - Report of Foreign Bank and Financial Accounts, Page 1\n\n2024\n\nName: Fname GenInfo\nTaxpayer ID: 123-\n\nWarning: Printed versions of the BSA E-Filing forms are not for submission and will not be processed by FinCEN\n\nTaxpayer Identification Number: 123-65-4987\n\nSpaces and dashes have been removed from identification numbers and postal codes where required for FinCEN electronic filing.\n\n1 This report is for calendar year ended 12/31/: 2024\n\nAmended: [ ]\nPrior report BSA Identifier: <empty>\n\nReason if filing late: <empty>",
+        "embed": "Form 1040\n\n# FinCEN 114 - Report of Foreign Bank and Financial Accounts, Page 1\n\n2024\n\nName: Fname GenInfo\nTaxpayer ID: 123-\n\nWarning: Printed versions of the BSA E-Filing forms are not for submission and will not be processed by FinCEN\n\nTaxpayer Identification Number: 123-65-4987\n\nSpaces and dashes have been removed from identification numbers and postal codes where required for FinCEN electronic filing.\n\n1 This report is for calendar year ended 12/31/: 2024\n\nAmended: [ ]\nPrior report BSA Identifier: <empty>\n\nReason if filing late: <empty>",
+        "enriched": null,
+        "enrichment_success": false
+      },
+      {
+        "blocks": [
+          {
+            "bbox": {
+              "height": 0.008838383838383838,
+              "left": 0.041666666666666664,
+              "page": 1,
+              "top": 0.2727272727272727,
+              "width": 0.18137254901960784,
+              "original_page": 1
+            },
+            "content": "Part I - Filer Information",
+            "type": "Section Header",
+            "confidence": "low",
+            "image_url": null,
+            "granular_confidence": {
+              "extract_confidence": null,
+              "parse_confidence": null
+            }
+          },
+          {
+            "bbox": {
+              "height": 0.3522727272727273,
+              "left": 0.03349673202614379,
+              "page": 1,
+              "top": 0.2967171717171717,
+              "width": 0.8913398692810458,
+              "original_page": 1
+            },
+            "content": "[[\"2\", \"Type of filer\", \"Individual\"], [\"3\", \"U.S. Taxpayer Identification Number\", \"123654987\"], [\"\\u0417\\u0430\", \"TIN type\", \"SSN/ITIN\"], [\"4\", \"Foreign identification\", \"\"], [\"\", \"4a Type Passport\", \"\"], [\"\", \"4b Number\", \"24131411\"], [\"\", \"4c Country of Issue\", \"Falkland Islands (Isla\"], [\"5\", \"Individual's date of birth\", \"06/06/1979\"], [\"6\", \"Last name or organization name\", \"GenInfo\"], [\"7\", \"First name\", \"Fname\"], [\"8\", \"Middle initial\", \"\"], [\"8a\", \"Suffix\", \"\"], [\"9\", \"Mailing address 444 mainstreet\", \"apt24\"], [\"10\", \"City\", \"Iron Mountain\"], [\"11\", \"State\", \"MI Michigan\"], [\"12\", \"Zip/postal code\", \"42929\"], [\"13\", \"Country US\", \"\"], [\"14a Does the filer have a financial interest in 25 or more financial accounts?\\n[ ]\", \"\", \"\"], [\"\", \"[ ]\", \"\"], [\"\", \"[x]\", \"\"], [\"2\\n14b Does the filer >> have signature authority over but no financial interest in 25 or more financial accounts?\", \"\", \"\"], [\"\", \"[ ]\", \"\"], [\"\", \"No\", \"[x]\"]]",
+            "type": "Table",
+            "confidence": "high",
+            "image_url": null,
+            "granular_confidence": {
+              "extract_confidence": null,
+              "parse_confidence": null
+            }
+          }
+        ],
+        "content": "# FinCEN 114 - Report of Foreign Bank and Financial Accounts, Page 1 (cont.)\n\n## Part I - Filer Information\n\n[[\"2\", \"Type of filer\", \"Individual\"], [\"3\", \"U.S. Taxpayer Identification Number\", \"123654987\"], [\"\\u0417\\u0430\", \"TIN type\", \"SSN/ITIN\"], [\"4\", \"Foreign identification\", \"\"], [\"\", \"4a Type Passport\", \"\"], [\"\", \"4b Number\", \"24131411\"], [\"\", \"4c Country of Issue\", \"Falkland Islands (Isla\"], [\"5\", \"Individual's date of birth\", \"06/06/1979\"], [\"6\", \"Last name or organization name\", \"GenInfo\"], [\"7\", \"First name\", \"Fname\"], [\"8\", \"Middle initial\", \"\"], [\"8a\", \"Suffix\", \"\"], [\"9\", \"Mailing address 444 mainstreet\", \"apt24\"], [\"10\", \"City\", \"Iron Mountain\"], [\"11\", \"State\", \"MI Michigan\"], [\"12\", \"Zip/postal code\", \"42929\"], [\"13\", \"Country US\", \"\"], [\"14a Does the filer have a financial interest in 25 or more financial accounts?\\n[ ]\", \"\", \"\"], [\"\", \"[ ]\", \"\"], [\"\", \"[x]\", \"\"], [\"2\\n14b Does the filer >> have signature authority over but no financial interest in 25 or more financial accounts?\", \"\", \"\"], [\"\", \"[ ]\", \"\"], [\"\", \"No\", \"[x]\"]]",
+        "embed": "# FinCEN 114 - Report of Foreign Bank and Financial Accounts, Page 1 (cont.)\n\n## Part I - Filer Information\n\n[[\"2\", \"Type of filer\", \"Individual\"], [\"3\", \"U.S. Taxpayer Identification Number\", \"123654987\"], [\"\\u0417\\u0430\", \"TIN type\", \"SSN/ITIN\"], [\"4\", \"Foreign identification\", \"\"], [\"\", \"4a Type Passport\", \"\"], [\"\", \"4b Number\", \"24131411\"], [\"\", \"4c Country of Issue\", \"Falkland Islands (Isla\"], [\"5\", \"Individual's date of birth\", \"06/06/1979\"], [\"6\", \"Last name or organization name\", \"GenInfo\"], [\"7\", \"First name\", \"Fname\"], [\"8\", \"Middle initial\", \"\"], [\"8a\", \"Suffix\", \"\"], [\"9\", \"Mailing address 444 mainstreet\", \"apt24\"], [\"10\", \"City\", \"Iron Mountain\"], [\"11\", \"State\", \"MI Michigan\"], [\"12\", \"Zip/postal code\", \"42929\"], [\"13\", \"Country US\", \"\"], [\"14a Does the filer have a financial interest in 25 or more financial accounts?\\n[ ]\", \"\", \"\"], [\"\", \"[ ]\", \"\"], [\"\", \"[x]\", \"\"], [\"2\\n14b Does the filer >> have signature authority over but no financial interest in 25 or more financial accounts?\", \"\", \"\"], [\"\", \"[ ]\", \"\"], [\"\", \"No\", \"[x]\"]]",
+        "enriched": null,
+        "enrichment_success": false
+      }
+    ],
+    "type": "full",
+    "custom": null,
+    "ocr": null
+  },
+  "usage": {
+    "num_pages": 1,
+    "credits": 1.0
+  },
+  "pdf_url": "https://prod-storage20241010144745140900000001.s3.amazonaws.com/b23f0962-2fe7-47ea-b97e-ea51b96d7a0e.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA2UOK6OVBCVLRBIJV%2F20250903%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250903T152856Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEN%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIG%2FQZMvWjTqygqrAchKsX5xIlkZbooCaxwf6l%2BFprucwAiEAvxEUpMwSp2TLsugtHwAV4YLeWLgCuzxzznFDJw897hkqgwUISBAAGgw3MzExMDY5MzIwMzQiDLuPpyhPUB5TyMhsdirgBF2BgLpZyKn8BCzCh%2FB4om2LTOUPCdtW8fwc96s8%2BM5lmMSKL7SW4H3NMruvG7Tpmt4b%2FGfoqISXh%2FT%2BZSDvQUS2NdOxC4Fev06uM89AKEp79zhg1rxvf3bexntqSFbtFed3uEOqcforUHqvuN1%2BuoAU08pt8onLvXdRnF7o1%2BElDaFCdGsABQVWqkAVE5sBjbm%2Fj1BPXTEkFjrfWFk9S1HKRu9t%2FN1eQrFgbjw%2BkZ49kyhq0QWahJSzHE4z8k%2FPxSENfDl9O9ywQQgaRGKrFRUUJFWAoDxFmZKMFd3gFtK7xSob4TbX5zSUxHVFDpjDRZ3kBr2FYzIOQl5rPEoAcpUZHnd%2BqOE6SaiLUJI3aZJ09NzEnclX1fH9uXDMip9YvR4wnsas%2FnBB5xQVDWO5YjnCKiLeFv2c%2Bed%2F8oOJX6V6H5aazZYbX0jaEvQISRsN06t28NZ7daoyb%2Bamfg%2FWd3eSzeS5oeG25NKCUx8Yd%2BPhku8rYQ2Er1UE6rOflt8EchI4ltb0ZSq8MQZggnNlxyEMJBRE4udr5kTtnAsnpq3%2F95kg0ynRKaKE7HrdP8STQ%2BVe1FHEsMQijmsV7DfzKCaewF6xjKWYW41lt2HVNU3FaDkTUft%2BDOIF9%2B87vPAAxOcd3Juf1AnqPB1puHGvVuThhFqWHK5wugUcw%2FqU0BbSEzT1LhX6abWe25IbVSMVAeHbmWiSMrHFLXNzrIrE4UJwvY9g3vT89tMsikcSx307OSYUCMl%2F3EGax2MJ0k8iv9AnhP%2B6q%2BDWvio8Ib88%2BNtuaUiJE31vLOg3%2FInMWk7uMMKy4cUGOpoBr1Sc0Hx4BaI7oXdya1j%2FnVoFfVkYxFAuOrjsZfNyIfl8c69Ym9nknh%2BYA34J%2FJGcaebVJRclX1ayfQhMXfncqYrC4nvPj9CvW3P%2FMe8yt1iI3hviFa7%2BOou2e4T4TA0STVrudyn%2F2IK09T%2BsYAhax35pjNa5YJNSrs3trmrDcMt3nIjXsR4nt4em01UX7pmALblZFkt0iL1HSQ%3D%3D&X-Amz-Signature=8d90ce08a5081d303bef7d85bec42dbb8581d26eab6c2e52063818c172f0f819",
+  "studio_link": "https://studio.reducto.ai/job/25b506b4-c559-46b2-938b-f39cfff70b80"
+}

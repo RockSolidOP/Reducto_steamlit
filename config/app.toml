@@ -1,0 +1,7 @@
+[app]
+app_storage_dir = "./storage"
+default_provider = "reducto"
+
+[keys]
+# leave secrets blank here; set via .env or OS env
+reducto_api_key = ""
