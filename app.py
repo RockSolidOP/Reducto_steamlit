@@ -155,12 +155,25 @@ def render_pdf_page_png_bytes(pdf_path: Path, page_number: int, zoom: float = 2.
         return pix.tobytes("png")
 
 # ---- Azure helpers ----
-def parse_with_azure(file_path: Path):
+def parse_with_azure_old(file_path: Path):
     """Run Azure Doc AI prebuilt-document model and return the result object."""
     client = create_azure_client()
     with open(file_path, "rb") as f:
         poller = client.begin_analyze_document("prebuilt-document", document=f)
     return poller.result()
+
+def parse_with_azure(file_path: Path, page_number: int):
+    """Run Azure Doc AI prebuilt-document model on a single page."""
+    client = create_azure_client()
+    with open(file_path, "rb") as f:
+        # Azure accepts page ranges like "1", "1-3", or a list ["1", "3"]
+        poller = client.begin_analyze_document(
+            "prebuilt-document",
+            document=f,
+            pages=str(page_number),   # <-- key line
+        )
+    return poller.result()
+
 
 def azure_to_dict(result) -> dict:
     """Best-effort convert Azure result to a dict."""
@@ -356,14 +369,57 @@ if do_process:
         st.exception(traceback.format_exc())
 
 # -------- Azure Doc AI path --------
+# if do_process_azure:
+#     st.divider()
+#     st.subheader("Azure Document AI Output")
+
+#     try:
+#         with st.status("Analyzing with Azure Document Intelligence…", expanded=False) as status:
+#             # azure_result = parse_with_azure(tmp_pdf)
+#             azure_result = parse_with_azure(tmp_pdf, int(page_number))
+#             st.caption(f"Azure analyzed page: {page_number}")
+
+#             status.update(label="Azure analysis complete", state="complete")
+
+#         colA, colB = st.columns(2)
+
+#         with colA:
+#             st.markdown("#### Raw Azure Output")
+#             az_raw = azure_to_dict(azure_result)
+#             st.json(az_raw)
+#             st.download_button(
+#                 "Download azure_raw.json",
+#                 data=json.dumps(az_raw, ensure_ascii=False, indent=2),
+#                 file_name="azure_raw.json",
+#                 mime="application/json",
+#             )
+
+#         with colB:
+#             st.markdown("#### Azure Key-Value Pairs (flattened)")
+#             kv_dict = azure_kv_to_dict(azure_result)
+#             st.json(kv_dict)
+#             st.download_button(
+#                 "Download azure_kv.json",
+#                 data=json.dumps(kv_dict, ensure_ascii=False, indent=2),
+#                 file_name="azure_kv.json",
+#                 mime="application/json",
+#             )
+
+#     except Exception as e:
+#         st.error(f"Azure Doc AI error: {e}")
+#         st.exception(traceback.format_exc())
+
+
 if do_process_azure:
     st.divider()
     st.subheader("Azure Document AI Output")
 
     try:
         with st.status("Analyzing with Azure Document Intelligence…", expanded=False) as status:
-            azure_result = parse_with_azure(tmp_pdf)
-            status.update(label="Azure analysis complete", state="complete")
+            azure_result = parse_with_azure(tmp_pdf, int(page_number))  # <-- pass page
+            status.update(label=f"Azure analysis complete (page {int(page_number)})", state="complete")
+
+        st.caption(f"Azure analyzed page: {int(page_number)}")
 
         colA, colB = st.columns(2)
 
@@ -374,7 +430,7 @@ if do_process_azure:
             st.download_button(
                 "Download azure_raw.json",
                 data=json.dumps(az_raw, ensure_ascii=False, indent=2),
-                file_name="azure_raw.json",
+                file_name=f"azure_raw_page{int(page_number)}.json",  # unique per page
                 mime="application/json",
             )
 
@@ -385,7 +441,7 @@ if do_process_azure:
             st.download_button(
                 "Download azure_kv.json",
                 data=json.dumps(kv_dict, ensure_ascii=False, indent=2),
-                file_name="azure_kv.json",
+                file_name=f"azure_kv_page{int(page_number)}.json",   # unique per page
                 mime="application/json",
             )
 
