@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import tempfile
 import traceback
 from pathlib import Path
 
@@ -24,6 +23,8 @@ from app.services.azure_service import (
 )
 from app.ui.debug import debug_panel
 from app.utils.pdf_preview import render_pdf_page_png_bytes
+from app.utils.storage import save_uploaded_file, cleanup_uploads, format_bytes, dir_size_bytes, get_uploads_dir
+from app.config import UPLOADS_CLEANUP
 
 
 st.set_page_config(page_title="Reducto + Azure Doc AI GUI", layout="wide")
@@ -36,17 +37,34 @@ st.sidebar.markdown("- Only the selected page is parsed for Reducto (saves cost/
 
 debug_panel()
 
-uploaded = st.file_uploader("Upload a PDF", type=["pdf"])  # type: ignore
+uploaded = st.file_uploader("Upload a PDF (saved locally)", type=["pdf"])  # type: ignore
 if uploaded is None:
     st.info("👆 Upload a PDF to get started.")
     st.stop()
 
-# Persist upload to a temp file
-tmp_pdf = Path(tempfile.mkstemp(suffix=".pdf")[1])
-tmp_pdf.write_bytes(uploaded.read())
+# Persist upload to a local folder (./uploads)
+pdf_path: Path = save_uploaded_file(uploaded)
+st.caption(f"Saved locally: {pdf_path}")
+
+# Housekeeping: clean uploads according to policy
+if UPLOADS_CLEANUP.get("enabled", False):
+    summary = cleanup_uploads(
+        max_age_days=UPLOADS_CLEANUP.get("max_age_days"),
+        max_total_size_mb=UPLOADS_CLEANUP.get("max_total_size_mb"),
+        max_files=UPLOADS_CLEANUP.get("max_files"),
+    )
+    if summary["deleted_count"]:
+        st.caption(
+            f"Uploads cleanup: deleted {summary['deleted_count']} file(s), freed {format_bytes(summary['freed_bytes'])}."
+        )
+    # Display current usage in sidebar
+    uploads_dir = get_uploads_dir()
+    st.sidebar.caption(
+        f"Uploads dir: {uploads_dir} • Size: {format_bytes(dir_size_bytes(uploads_dir))}"
+    )
 
 # Determine page count to bound the selector
-with fitz.open(tmp_pdf) as doc:
+with fitz.open(pdf_path) as doc:
     page_count = doc.page_count
 
 col_left, col_right = st.columns([1, 2], gap="large")
@@ -65,7 +83,7 @@ with col_left:
         do_process_azure = st.button("Process with Azure AI")
 
 # Always show a page preview (cheap UX win)
-png_bytes = render_pdf_page_png_bytes(tmp_pdf, int(page_number), zoom=2.0)
+png_bytes = render_pdf_page_png_bytes(pdf_path, int(page_number), zoom=2.0)
 with col_right:
     st.subheader(f"PDF Preview — Page {int(page_number)}")
     st.image(png_bytes, caption=f"Page {int(page_number)}", use_container_width=True)
@@ -75,7 +93,7 @@ if do_process:
     try:
         client = create_client()
         with st.status("Parsing with Reducto…", expanded=False) as status:
-            parsed = parse_document(client, tmp_pdf, int(page_number))
+            parsed = parse_document(client, pdf_path, int(page_number))
             status.update(label="Parsing complete", state="complete")
 
         # Outputs
@@ -167,7 +185,7 @@ if do_process_azure:
 
     try:
         with st.status("Analyzing with Azure Document Intelligence…", expanded=False) as status:
-            azure_result = parse_with_azure(tmp_pdf, int(page_number))
+            azure_result = parse_with_azure(pdf_path, int(page_number))
             status.update(label=f"Azure analysis complete (page {int(page_number)})", state="complete")
 
         st.caption(f"Azure analyzed page: {int(page_number)}")

@@ -7,6 +7,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from azure.core.credentials import AzureKeyCredential
 from azure.ai.formrecognizer import DocumentAnalysisClient
+from app.config import AZURE_CONFIG
 
 
 def create_azure_client() -> DocumentAnalysisClient:
@@ -30,9 +31,10 @@ def parse_with_azure_old(file_path: Path):
 def parse_with_azure(file_path: Path, page_number: int):
     """Run Azure Doc AI prebuilt-document model on a single page."""
     client = create_azure_client()
+    model_id = AZURE_CONFIG.get("model_id", "prebuilt-document")
     with open(file_path, "rb") as f:
         poller = client.begin_analyze_document(
-            "prebuilt-document",
+            model_id,
             document=f,
             pages=str(page_number),
         )
@@ -59,4 +61,3 @@ def azure_kv_to_dict(result) -> dict:
         if key_text:
             kv_dict[key_text] = value_text
     return kv_dict
-
