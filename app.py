@@ -128,21 +128,44 @@ def parse_document(client: Reducto, file_path: Path, page_number: int) -> dict:
     )
     return result.model_dump()
 
+def _present_block_pages(parsed: dict) -> List[int]:
+    pages = set()
+    for chunk in parsed.get("result", {}).get("chunks", []) or []:
+        for block in chunk.get("blocks", []) or []:
+            p = (block.get("bbox") or {}).get("page")
+            if isinstance(p, int):
+                pages.add(p)
+    return sorted(pages)
+
+def _resolve_effective_page(parsed: dict, requested_page: int) -> int:
+    """Reducto may renumber pages to 1 when parsing a single page range.
+    If the requested page isn't present in block bboxes, fall back to the sole
+    page number present (if exactly one), otherwise keep the requested.
+    """
+    pages = _present_block_pages(parsed)
+    if requested_page in pages:
+        return requested_page
+    if len(pages) == 1:
+        return pages[0]
+    return requested_page
+
 def extract_page_blocks(parsed: dict, page_number: int) -> Iterable[str]:
-    """Yield text content for blocks on a given page."""
-    for chunk in parsed.get("result", {}).get("chunks", []):
-        for block in chunk.get("blocks", []):
-            if (block.get("bbox") or {}).get("page") == page_number:
+    """Yield text content for blocks on a given page, with resilient page mapping."""
+    effective_page = _resolve_effective_page(parsed, page_number)
+    for chunk in parsed.get("result", {}).get("chunks", []) or []:
+        for block in chunk.get("blocks", []) or []:
+            if (block.get("bbox") or {}).get("page") == effective_page:
                 content = block.get("content")
                 if content is not None:
                     yield content
 
 def get_blocks_for_page(parsed: dict, page_number: int) -> List[Dict[str, Any]]:
-    """Return full block dicts for a given page."""
+    """Return full block dicts for a given page, with resilient page mapping."""
     out: List[Dict[str, Any]] = []
-    for chunk in parsed.get("result", {}).get("chunks", []):
+    effective_page = _resolve_effective_page(parsed, page_number)
+    for chunk in parsed.get("result", {}).get("chunks", []) or []:
         for block in chunk.get("blocks", []) or []:
-            if (block.get("bbox") or {}).get("page") == page_number:
+            if (block.get("bbox") or {}).get("page") == effective_page:
                 out.append(block)
     return out
 
@@ -303,7 +326,9 @@ if do_process:
                 mime="application/json",
             )
 
-        # Gather blocks/text for the requested page
+        # Gather blocks/text for the requested page (with resilient page mapping)
+        present_pages = _present_block_pages(parsed)
+        effective_page = _resolve_effective_page(parsed, int(page_number))
         page_text_blocks = list(extract_page_blocks(parsed, int(page_number)))
         page_blocks = get_blocks_for_page(parsed, int(page_number))
 
@@ -316,6 +341,9 @@ if do_process:
             # quick diagnostics + artifact
             st.markdown("**Block diagnostics**")
             st.write({
+                "requested_page": int(page_number),
+                "effective_page": int(effective_page),
+                "present_pages": present_pages,
                 "num_blocks": len(page_blocks),
                 "text_blocks": len(page_text_blocks),
                 "content_lengths": [len(b.get('content') or '') for b in page_blocks[:20]],
