@@ -1,265 +1,31 @@
 from __future__ import annotations
-_APP_DOC = """
-Streamlit GUI to upload a PDF, run Reducto parsing, and display:
-1) "parsed"       – raw Reducto JSON
-2) "block"        – concatenated text from the selected page
-3) "parsed_info"  – post-processed JSON via your post_processors/post_processor.py
-4) Azure Document AI – raw + key-value JSON
 
-Extras:
-- PDF page preview (PyMuPDF)
-- Debug panel (env/key checks, cwd, files)
-- Hot-reload for post_processors.post_processor
-- Single-block reproducer to isolate crashes (Reducto)
-- Dual-engine buttons to control cost
-
-Setup:
-  pip install -U streamlit reductoai python-dotenv pymupdf pillow azure-ai-formrecognizer
-  # NOTE: the PyPI package is `reductoai`, but import is `from reducto import Reducto`
-
-Env (.env):
-  REDUCTO_API_KEY=...
-  AZURE_DOC_AI_ENDPOINT=https://<your-resource>.cognitiveservices.azure.com/
-  AZURE_DOC_AI_KEY=...
-
-Run:
-  streamlit run app.py
-"""
-
-import copy
-import glob
-import importlib
-import io
 import json
-import os
-import sys
 import tempfile
 import traceback
 from pathlib import Path
-from typing import Iterable, List, Dict, Any
 
-import streamlit as st
-from dotenv import load_dotenv
-
-# PDF rendering
 import fitz  # PyMuPDF
-from PIL import Image
+import streamlit as st
 
-# Reducto SDK (installed via `pip install reductoai`)
-from reducto import Reducto, ReductoError
-
-# Azure Doc AI
-from azure.core.credentials import AzureKeyCredential
-from azure.ai.formrecognizer import DocumentAnalysisClient
-
-# ---- Options (from your original script) ----
-OPTIONS = {
-    "ocr_mode": "agentic",
-    "extraction_mode": "ocr",
-    "chunking": {"chunk_mode": "variable"},
-}
-
-ADVANCED_OPTIONS = {
-    "ocr_system": "multilingual",
-    # page_range is set dynamically to the selected page
-    "page_range": {"start": 1, "end": 10},
-    "table_output_format": "ai_json",
-    "merge_tables": True,
-}
-
-EXPERIMENTAL_OPTIONS = {
-    "enable_checkboxes": True,
-    "return_figure_images": False,
-    "rotate_pages": True,
-}
-
-# ---- Post-processor import + hot-reload support ----
-POST_PROCESSOR_PATH = None
-_pp = None  # module handle
-def _import_post_processor():
-    global _pp, POST_PROCESSOR_PATH, parse_page3_blocks_resilient
-    try:
-        import post_processors.post_processor as _pp  # your file in a package folder
-        parse_page3_blocks_resilient = _pp.parse_page3_blocks_resilient
-        POST_PROCESSOR_PATH = getattr(_pp, "__file__", None)
-        return True, None
-    except Exception as e:
-        POST_PROCESSOR_PATH = None
-        def parse_page3_blocks_resilient(blocks: List[Dict[str, Any]]) -> Dict[str, Any]:
-            return {
-                "warning": "post_processors.post_processor not found or failed to import; returning blocks summary.",
-                "blocks_count": len(blocks),
-                "sample_keys": sorted({k for b in blocks for k in b.keys()})[:10],
-            }
-        return False, e
-
-_ok, _err = _import_post_processor()
-
-# ---- Helpers ----
-def create_azure_client() -> DocumentAnalysisClient:
-    """Create an Azure Document Analysis client using env vars."""
-    load_dotenv()
-    endpoint = os.getenv("AZURE_DOC_AI_ENDPOINT")
-    key = os.getenv("AZURE_DOC_AI_KEY")
-    if not endpoint or not key:
-        raise RuntimeError("AZURE_DOC_AI_ENDPOINT or AZURE_DOC_AI_KEY not set in .env")
-    return DocumentAnalysisClient(endpoint=endpoint, credential=AzureKeyCredential(key))
-
-def create_client() -> Reducto:
-    """Create a Reducto client using an API key from .env or environment."""
-    load_dotenv()
-    api_key = os.getenv("REDUCTO_API_KEY")
-    if not api_key:
-        raise ReductoError(
-            "REDUCTO_API_KEY is not set. Provide it via environment variable or .env file."
-        )
-    return Reducto(api_key=api_key)
-
-def parse_document(client: Reducto, file_path: Path, page_number: int) -> dict:
-    """Upload and parse a document for a specific page."""
-    upload_url = client.upload(file=file_path)
-    adv = copy.deepcopy(ADVANCED_OPTIONS)
-    adv["page_range"] = {"start": page_number, "end": page_number}
-    result = client.parse.run(
-        document_url=upload_url,
-        options=OPTIONS,
-        advanced_options=adv,
-        experimental_options=EXPERIMENTAL_OPTIONS,
-    )
-    return result.model_dump()
-
-def _present_block_pages(parsed: dict) -> List[int]:
-    pages = set()
-    for chunk in parsed.get("result", {}).get("chunks", []) or []:
-        for block in chunk.get("blocks", []) or []:
-            p = (block.get("bbox") or {}).get("page")
-            if isinstance(p, int):
-                pages.add(p)
-    return sorted(pages)
-
-def _resolve_effective_page(parsed: dict, requested_page: int) -> int:
-    """Reducto may renumber pages to 1 when parsing a single page range.
-    If the requested page isn't present in block bboxes, fall back to the sole
-    page number present (if exactly one), otherwise keep the requested.
-    """
-    pages = _present_block_pages(parsed)
-    if requested_page in pages:
-        return requested_page
-    if len(pages) == 1:
-        return pages[0]
-    return requested_page
-
-def extract_page_blocks(parsed: dict, page_number: int) -> Iterable[str]:
-    """Yield text content for blocks on a given page, with resilient page mapping."""
-    effective_page = _resolve_effective_page(parsed, page_number)
-    for chunk in parsed.get("result", {}).get("chunks", []) or []:
-        for block in chunk.get("blocks", []) or []:
-            if (block.get("bbox") or {}).get("page") == effective_page:
-                content = block.get("content")
-                if content is not None:
-                    yield content
-
-def get_blocks_for_page(parsed: dict, page_number: int) -> List[Dict[str, Any]]:
-    """Return full block dicts for a given page, with resilient page mapping."""
-    out: List[Dict[str, Any]] = []
-    effective_page = _resolve_effective_page(parsed, page_number)
-    for chunk in parsed.get("result", {}).get("chunks", []) or []:
-        for block in chunk.get("blocks", []) or []:
-            if (block.get("bbox") or {}).get("page") == effective_page:
-                out.append(block)
-    return out
-
-def render_pdf_page_png_bytes(pdf_path: Path, page_number: int, zoom: float = 2.0) -> bytes:
-    """Return PNG bytes for the given PDF page (1-indexed)."""
-    with fitz.open(pdf_path) as doc:
-        page_index = max(0, min(page_number - 1, doc.page_count - 1))
-        page = doc.load_page(page_index)
-        pix = page.get_pixmap(matrix=fitz.Matrix(zoom, zoom), alpha=False)
-        return pix.tobytes("png")
-
-# ---- Azure helpers ----
-def parse_with_azure_old(file_path: Path):
-    """Run Azure Doc AI prebuilt-document model and return the result object."""
-    client = create_azure_client()
-    with open(file_path, "rb") as f:
-        poller = client.begin_analyze_document("prebuilt-document", document=f)
-    return poller.result()
-
-def parse_with_azure(file_path: Path, page_number: int):
-    """Run Azure Doc AI prebuilt-document model on a single page."""
-    client = create_azure_client()
-    with open(file_path, "rb") as f:
-        # Azure accepts page ranges like "1", "1-3", or a list ["1", "3"]
-        poller = client.begin_analyze_document(
-            "prebuilt-document",
-            document=f,
-            pages=str(page_number),   # <-- key line
-        )
-    return poller.result()
+from app.post_processing import parse_page3_blocks_resilient
+from app.services.reducto_service import (
+    create_client,
+    parse_document,
+    _present_block_pages,
+    _resolve_effective_page,
+    extract_page_blocks,
+    get_blocks_for_page,
+)
+from app.services.azure_service import (
+    parse_with_azure,
+    azure_to_dict,
+    azure_kv_to_dict,
+)
+from app.ui.debug import debug_panel
+from app.utils.pdf_preview import render_pdf_page_png_bytes
 
 
-def azure_to_dict(result) -> dict:
-    """Best-effort convert Azure result to a dict."""
-    try:
-        return result.to_dict()  # available in recent SDKs
-    except AttributeError:
-        try:
-            return json.loads(result.to_json())
-        except Exception:
-            # last resort: shallow projection
-            return {"documents": [vars(d) for d in getattr(result, "documents", [])]}
-
-def azure_kv_to_dict(result) -> dict:
-    kv_dict = {}
-    for kv_pair in result.key_value_pairs:
-        key_text = kv_pair.key.content if kv_pair.key else None
-        value_text = kv_pair.value.content if kv_pair.value else None
-        if key_text:
-            kv_dict[key_text] = value_text
-    return kv_dict
-
-# ---- Debug panel ----
-def debug_panel():
-    st.sidebar.markdown("---")
-    st.sidebar.subheader("🔧 Debug")
-    dbg = st.sidebar.checkbox("Enable debug mode")
-    if not dbg:
-        return
-
-    st.sidebar.write("**Python**:", sys.version)
-    st.sidebar.write("**Interpreter**:", sys.executable)
-    st.sidebar.write("**CWD**:", os.getcwd())
-
-    # Show presence of .env without leaking secrets
-    env_paths = [Path(".env"), *[Path(p) for p in glob.glob("**/.env", recursive=False)]]
-    env_exists = [str(p.resolve()) for p in env_paths if p.exists()]
-    st.sidebar.write("**.env found at**:", env_exists or "(none)")
-
-    red_key = os.getenv("REDUCTO_API_KEY")
-    st.sidebar.write("**REDUCTO_API_KEY set**:", bool(red_key), "| length:", len(red_key or ""))
-
-    az_ep = os.getenv("AZURE_DOC_AI_ENDPOINT")
-    az_key = os.getenv("AZURE_DOC_AI_KEY")
-    st.sidebar.write("**AZURE_DOC_AI_ENDPOINT set**:", bool(az_ep))
-    st.sidebar.write("**AZURE_DOC_AI_KEY set**:", bool(az_key), "| length:", len(az_key or ""))
-
-    if POST_PROCESSOR_PATH:
-        st.sidebar.caption(f"post_processor: `{POST_PROCESSOR_PATH}`")
-        if st.sidebar.button("Reload post_processor.py"):
-            try:
-                mod = importlib.reload(_pp)  # type: ignore
-                globals()["parse_page3_blocks_resilient"] = mod.parse_page3_blocks_resilient  # type: ignore
-                st.sidebar.success("Reloaded post_processor.py")
-            except Exception as e:
-                st.sidebar.error(f"Reload failed: {e}")
-                st.sidebar.exception(traceback.format_exc())
-    else:
-        st.sidebar.warning("post_processors.post_processor NOT loaded. Using fallback.")
-
-    if st.sidebar.button("🔄 Rerun"):
-        st.rerun()
-
-# ---- UI ----
 st.set_page_config(page_title="Reducto + Azure Doc AI GUI", layout="wide")
 st.title("Reducto + Azure Doc AI GUI")
 st.caption("Upload a PDF → pick a page → click **Process with Reducto** or **Process with Azure AI**.")
@@ -391,60 +157,17 @@ if do_process:
                 st.error("Parser crashed on this block.")
                 st.exception(traceback.format_exc())
 
-    except ReductoError as e:
-        st.error(f"Reducto error: {e}")
     except Exception:
         st.exception(traceback.format_exc())
 
 # -------- Azure Doc AI path --------
-# if do_process_azure:
-#     st.divider()
-#     st.subheader("Azure Document AI Output")
-
-#     try:
-#         with st.status("Analyzing with Azure Document Intelligence…", expanded=False) as status:
-#             # azure_result = parse_with_azure(tmp_pdf)
-#             azure_result = parse_with_azure(tmp_pdf, int(page_number))
-#             st.caption(f"Azure analyzed page: {page_number}")
-
-#             status.update(label="Azure analysis complete", state="complete")
-
-#         colA, colB = st.columns(2)
-
-#         with colA:
-#             st.markdown("#### Raw Azure Output")
-#             az_raw = azure_to_dict(azure_result)
-#             st.json(az_raw)
-#             st.download_button(
-#                 "Download azure_raw.json",
-#                 data=json.dumps(az_raw, ensure_ascii=False, indent=2),
-#                 file_name="azure_raw.json",
-#                 mime="application/json",
-#             )
-
-#         with colB:
-#             st.markdown("#### Azure Key-Value Pairs (flattened)")
-#             kv_dict = azure_kv_to_dict(azure_result)
-#             st.json(kv_dict)
-#             st.download_button(
-#                 "Download azure_kv.json",
-#                 data=json.dumps(kv_dict, ensure_ascii=False, indent=2),
-#                 file_name="azure_kv.json",
-#                 mime="application/json",
-#             )
-
-#     except Exception as e:
-#         st.error(f"Azure Doc AI error: {e}")
-#         st.exception(traceback.format_exc())
-
-
 if do_process_azure:
     st.divider()
     st.subheader("Azure Document AI Output")
 
     try:
         with st.status("Analyzing with Azure Document Intelligence…", expanded=False) as status:
-            azure_result = parse_with_azure(tmp_pdf, int(page_number))  # <-- pass page
+            azure_result = parse_with_azure(tmp_pdf, int(page_number))
             status.update(label=f"Azure analysis complete (page {int(page_number)})", state="complete")
 
         st.caption(f"Azure analyzed page: {int(page_number)}")
@@ -458,7 +181,7 @@ if do_process_azure:
             st.download_button(
                 "Download azure_raw.json",
                 data=json.dumps(az_raw, ensure_ascii=False, indent=2),
-                file_name=f"azure_raw_page{int(page_number)}.json",  # unique per page
+                file_name=f"azure_raw_page{int(page_number)}.json",
                 mime="application/json",
             )
 
@@ -469,7 +192,7 @@ if do_process_azure:
             st.download_button(
                 "Download azure_kv.json",
                 data=json.dumps(kv_dict, ensure_ascii=False, indent=2),
-                file_name=f"azure_kv_page{int(page_number)}.json",   # unique per page
+                file_name=f"azure_kv_page{int(page_number)}.json",
                 mime="application/json",
             )
 
