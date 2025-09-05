@@ -53,3 +53,17 @@ UPLOADS_CLEANUP = {
     "max_total_size_mb": 512,  # keep uploads dir under 512 MB
     "max_files": 1000,         # and at most 1000 files
 }
+
+
+# ---------------------------
+# PyMuPDF (local extraction)
+# ---------------------------
+PYMUPDF_CONFIG = {
+    # Text extraction strategy: "blocks" or "dict"
+    "text_mode": "blocks",
+    # Heuristic KV extraction toggles
+    "kv_enable_colon": True,
+    "kv_enable_dot_leader": True,
+    # Treat multiple values: "first", "last", or "list"
+    "kv_merge_strategy": "first",
+}
