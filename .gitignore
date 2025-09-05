@@ -1,6 +1,15 @@
+# Environment and local config
 .env
-testing_files/
-uploads/
-app/services/__pycache__/
-app/__pycache__/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# OS/editor artifacts
 .DS_Store
+
+# Local dev artifacts
+.venv/
+uploads/
+testing_files/

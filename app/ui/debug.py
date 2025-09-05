@@ -35,6 +35,18 @@ def debug_panel():
     st.sidebar.write("**AZURE_DOC_AI_ENDPOINT set**:", bool(az_ep))
     st.sidebar.write("**AZURE_DOC_AI_KEY set**:", bool(az_key), "| length:", len(az_key or ""))
 
+    # Network / TLS diagnostics
+    st.sidebar.markdown("**Network/TLS diagnostics**")
+    try:
+        import certifi  # type: ignore
+        ca_path = certifi.where() if hasattr(certifi, "where") else "(unknown)"
+        st.sidebar.write("certifi CA bundle:", ca_path)
+    except Exception:
+        st.sidebar.write("certifi CA bundle:", "(certifi not available)")
+    for k in ("SSL_CERT_FILE", "REQUESTS_CA_BUNDLE", "CURL_CA_BUNDLE", "HTTPS_PROXY", "HTTP_PROXY", "NO_PROXY"):
+        v = os.getenv(k)
+        st.sidebar.write(f"{k}:", v if v else "(unset)")
+
     if POST_PROCESSOR_PATH:
         st.sidebar.caption(f"post_processor: `{POST_PROCESSOR_PATH}`")
     else:
@@ -51,4 +63,3 @@ def debug_panel():
 
     if st.sidebar.button("🔄 Rerun"):
         st.rerun()
-

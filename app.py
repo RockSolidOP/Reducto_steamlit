@@ -116,14 +116,37 @@ with col_right:
 # -------- Reducto path --------
 if do_process:
     try:
-        client = create_client()
-        with st.status("Parsing with Reducto…", expanded=False) as status:
-            t0 = perf_counter()
-            parsed = parse_document(client, pdf_path, int(page_number))
-            reducto_api_secs = perf_counter() - t0
-            status.update(label="Parsing complete", state="complete")
+        # Create client (may fail if API key missing)
+        try:
+            client = create_client()
+        except Exception as e:
+            st.error("Reducto is unavailable (configuration or network policy).")
+            st.caption("Error details (copyable):")
+            st.code(f"{type(e).__name__}: {e}")
+            with st.expander("Full traceback"):
+                st.exception(traceback.format_exc())
+            # Skip Reducto path for this run
+            st.stop()
 
-        # Outputs
+        parsed = None
+        reducto_api_secs = 0.0
+        with st.status("Parsing with Reducto…", expanded=False) as status:
+            try:
+                t0 = perf_counter()
+                parsed = parse_document(client, pdf_path, int(page_number))
+                reducto_api_secs = perf_counter() - t0
+                status.update(label="Parsing complete", state="complete")
+            except Exception as e:
+                status.update(label="Reducto request failed", state="error")
+                st.error("Cannot upload to Reducto — likely blocked by corporate policy.")
+                st.caption("Error details (copyable):")
+                st.code(f"{type(e).__name__}: {e}")
+                with st.expander("Full traceback"):
+                    st.exception(traceback.format_exc())
+                # Skip further Reducto outputs
+                st.stop()
+
+        # Outputs (only if parsed OK)
         st.divider()
         st.caption(f"⏱️ Reducto timings — API: {_fmt_duration(reducto_api_secs)}")
         out1, out2, out3 = st.columns(3)
@@ -236,10 +259,19 @@ if do_process_azure:
 
     try:
         with st.status("Analyzing with Azure Document Intelligence…", expanded=False) as status:
-            az_t0 = perf_counter()
-            azure_result = parse_with_azure(pdf_path, int(page_number))
-            azure_api_secs = perf_counter() - az_t0
-            status.update(label=f"Azure analysis complete (page {int(page_number)})", state="complete")
+            try:
+                az_t0 = perf_counter()
+                azure_result = parse_with_azure(pdf_path, int(page_number))
+                azure_api_secs = perf_counter() - az_t0
+                status.update(label=f"Azure analysis complete (page {int(page_number)})", state="complete")
+            except Exception as e:
+                status.update(label="Azure analysis failed", state="error")
+                st.error("Cannot call Azure Document Intelligence — may be blocked by policy or misconfigured.")
+                st.caption("Error details (copyable):")
+                st.code(f"{type(e).__name__}: {e}")
+                with st.expander("Full traceback"):
+                    st.exception(traceback.format_exc())
+                st.stop()
 
         st.caption(f"Azure analyzed page: {int(page_number)}")
         st.caption(f"⏱️ Azure timings — API: {_fmt_duration(azure_api_secs)}")
