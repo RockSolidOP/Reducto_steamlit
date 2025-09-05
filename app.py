@@ -3,6 +3,28 @@ from __future__ import annotations
 import json
 import traceback
 from pathlib import Path
+from time import perf_counter
+
+
+def _fmt_duration(seconds: float) -> str:
+    """Format durations with adaptive units: μs, ms, s, or m:s."""
+    try:
+        s = float(seconds)
+    except Exception:
+        return "-"
+    if s < 1e-6:
+        return f"{s * 1e9:.0f} ns"
+    if s < 1e-3:
+        return f"{s * 1e6:.1f} μs"
+    if s < 1:
+        return f"{s * 1e3:.1f} ms"
+    if s < 60:
+        return f"{s:.3f} s"
+    m, r = divmod(s, 60)
+    if m < 60:
+        return f"{int(m)}m {r:.1f}s"
+    h, m = divmod(int(m), 60)
+    return f"{h}h {m}m {r:.0f}s"
 
 import fitz  # PyMuPDF
 import streamlit as st
@@ -25,6 +47,8 @@ from app.ui.debug import debug_panel
 from app.utils.pdf_preview import render_pdf_page_png_bytes
 from app.utils.storage import save_uploaded_file, cleanup_uploads, format_bytes, dir_size_bytes, get_uploads_dir
 from app.config import UPLOADS_CLEANUP
+from app.services.pymupdf_service import parse_with_pymupdf, simple_page_dump
+from app.services.pymupdf_kv import extract_text_pymupdf, postprocess_pymupdf
 
 
 st.set_page_config(page_title="Reducto + Azure Doc AI GUI", layout="wide")
@@ -81,6 +105,7 @@ with col_left:
         do_process = st.button("Process with Reducto", type="primary")
     with c2:
         do_process_azure = st.button("Process with Azure AI")
+    do_process_pymupdf = st.button("Process with PyMuPDF (local)")
 
 # Always show a page preview (cheap UX win)
 png_bytes = render_pdf_page_png_bytes(pdf_path, int(page_number), zoom=2.0)
@@ -93,11 +118,14 @@ if do_process:
     try:
         client = create_client()
         with st.status("Parsing with Reducto…", expanded=False) as status:
+            t0 = perf_counter()
             parsed = parse_document(client, pdf_path, int(page_number))
+            reducto_api_secs = perf_counter() - t0
             status.update(label="Parsing complete", state="complete")
 
         # Outputs
         st.divider()
+        st.caption(f"⏱️ Reducto timings — API: {_fmt_duration(reducto_api_secs)}")
         out1, out2, out3 = st.columns(3)
 
         with out1:
@@ -142,8 +170,28 @@ if do_process:
         with out3:
             st.markdown("#### 3) parsed_info (post-processed)")
             try:
+                tpp0 = perf_counter()
                 parsed_info = parse_page3_blocks_resilient(page_blocks)
+                reducto_post_secs = perf_counter() - tpp0
+                st.caption(f"Post-processing time: {_fmt_duration(reducto_post_secs)}")
                 st.json(parsed_info)
+                # Optional: per-block post-processing timing summary
+                try:
+                    per_blk_times = []
+                    for blk in page_blocks:
+                        _t0 = perf_counter()
+                        _ = parse_page3_blocks_resilient([blk])
+                        per_blk_times.append(perf_counter() - _t0)
+                    if per_blk_times:
+                        cnt = len(per_blk_times)
+                        avg = sum(per_blk_times) / cnt
+                        mx = max(per_blk_times)
+                        st.caption(
+                            f"Per-block post-processing — count: {cnt} • avg: {_fmt_duration(avg)} • max: {_fmt_duration(mx)}"
+                        )
+                except Exception:
+                    # Non-fatal: ignore timing errors
+                    pass
                 st.download_button(
                     "Download parsed_info.json",
                     data=json.dumps(parsed_info, ensure_ascii=False, indent=2),
@@ -168,8 +216,11 @@ if do_process:
             blk = page_blocks[int(idx)]
             st.code((blk.get("content") or "")[:2000], language="text")
             try:
+                _t0 = perf_counter()
                 out = parse_page3_blocks_resilient([blk])
+                _secs = perf_counter() - _t0
                 st.success("Parser returned:")
+                st.caption(f"Per-block post-processing time: {_fmt_duration(_secs)}")
                 st.json(out)
             except Exception:
                 st.error("Parser crashed on this block.")
@@ -185,10 +236,13 @@ if do_process_azure:
 
     try:
         with st.status("Analyzing with Azure Document Intelligence…", expanded=False) as status:
+            az_t0 = perf_counter()
             azure_result = parse_with_azure(pdf_path, int(page_number))
+            azure_api_secs = perf_counter() - az_t0
             status.update(label=f"Azure analysis complete (page {int(page_number)})", state="complete")
 
         st.caption(f"Azure analyzed page: {int(page_number)}")
+        st.caption(f"⏱️ Azure timings — API: {_fmt_duration(azure_api_secs)}")
 
         colA, colB = st.columns(2)
 
@@ -205,7 +259,10 @@ if do_process_azure:
 
         with colB:
             st.markdown("#### Azure Key-Value Pairs (flattened)")
+            kv_t0 = perf_counter()
             kv_dict = azure_kv_to_dict(azure_result)
+            azure_post_secs = perf_counter() - kv_t0
+            st.caption(f"Post-processing time: {_fmt_duration(azure_post_secs)}")
             st.json(kv_dict)
             st.download_button(
                 "Download azure_kv.json",
@@ -221,3 +278,61 @@ if do_process_azure:
 # If neither button clicked, just show preview + wait for action
 if not (do_process or do_process_azure):
     st.info("Select a page and click **Process with Reducto** or **Process with Azure AI**.")
+
+# -------- PyMuPDF (local) path --------
+if do_process_pymupdf:
+    st.divider()
+    st.subheader("PyMuPDF Output (local extraction)")
+    try:
+        # 1) Normalized plain text from PyMuPDF (all pages)
+        pm_t0 = perf_counter()
+        normalized_text = extract_text_pymupdf(pdf_path)
+        pymupdf_api_secs = perf_counter() - pm_t0
+        # 2) Heuristic KVs derived from that text
+        pm_pp0 = perf_counter()
+        heur_kv = postprocess_pymupdf(normalized_text)
+        pymupdf_post_secs = perf_counter() - pm_pp0
+
+        st.caption(
+            f"⏱️ PyMuPDF timings — Extraction: {_fmt_duration(pymupdf_api_secs)} • Post-processing: {_fmt_duration(pymupdf_post_secs)}"
+        )
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("#### PyMuPDF Text (normalized)")
+            st.text(normalized_text)
+            st.download_button(
+                "Download pymupdf_text.txt",
+                data=normalized_text,
+                file_name=f"pymupdf_text_page{int(page_number)}.txt",
+                mime="text/plain",
+            )
+        with col2:
+            st.markdown("#### PyMuPDF Heuristic Key-Values")
+            st.json(heur_kv)
+            st.download_button(
+                "Download pymupdf_kv.json",
+                data=json.dumps(heur_kv, ensure_ascii=False, indent=2),
+                file_name=f"pymupdf_kv_page{int(page_number)}.json",
+                mime="application/json",
+            )
+
+        with st.expander("Advanced: Raw PyMuPDF structures"):
+            adv_t0 = perf_counter()
+            result = parse_with_pymupdf(pdf_path, int(page_number))
+            adv_secs = perf_counter() - adv_t0
+            st.markdown("- Page Dict")
+            st.json(result.get("dict", {}))
+            st.markdown("- Blocks")
+            st.json(result.get("blocks", []))
+            st.markdown("- Words")
+            st.json(result.get("words", []))
+            st.markdown("- Notebook-style Dump")
+            dump_t0 = perf_counter()
+            dump_txt = simple_page_dump(pdf_path, int(page_number))
+            dump_secs = perf_counter() - dump_t0
+            st.caption(f"Advanced timings — dict/blocks/words: {_fmt_duration(adv_secs)} • dump: {_fmt_duration(dump_secs)}")
+            st.text(dump_txt)
+    except Exception:
+        st.error("PyMuPDF extraction failed.")
+        st.exception(traceback.format_exc())
