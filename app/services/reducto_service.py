@@ -36,6 +36,24 @@ def parse_document(client: Reducto, file_path: Path, page_number: int) -> dict:
     return result.model_dump()
 
 
+def parse_document_range(client: Reducto, file_path: Path, start_page: int, end_page: int) -> dict:
+    """Upload and parse a document for a page range (inclusive)."""
+    upload_url = client.upload(file=file_path)
+    adv = copy.deepcopy(ADVANCED_OPTIONS)
+    s = int(start_page)
+    e = int(end_page)
+    if e < s:
+        s, e = e, s
+    adv["page_range"] = {"start": s, "end": e}
+    result = client.parse.run(
+        document_url=upload_url,
+        options=OPTIONS,
+        advanced_options=adv,
+        experimental_options=EXPERIMENTAL_OPTIONS,
+    )
+    return result.model_dump()
+
+
 def _present_block_pages(parsed: dict) -> List[int]:
     pages = set()
     for chunk in parsed.get("result", {}).get("chunks", []) or []:
@@ -76,4 +94,3 @@ def get_blocks_for_page(parsed: dict, page_number: int) -> List[Dict[str, Any]]:
             if (block.get("bbox") or {}).get("page") == effective_page:
                 out.append(block)
     return out
-

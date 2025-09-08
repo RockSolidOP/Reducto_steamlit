@@ -40,35 +40,195 @@ from app.services.reducto_service import (
 )
 from app.services.azure_service import (
     parse_with_azure,
+    parse_with_azure_docint,
     azure_to_dict,
     azure_kv_to_dict,
+    azure_fields_to_dict,
 )
 from app.ui.debug import debug_panel
 from app.utils.pdf_preview import render_pdf_page_png_bytes
-from app.utils.storage import save_uploaded_file, cleanup_uploads, format_bytes, dir_size_bytes, get_uploads_dir
-from app.config import UPLOADS_CLEANUP
-from app.services.pymupdf_service import parse_with_pymupdf, simple_page_dump
+from app.utils.storage import (
+    save_uploaded_file,
+    cleanup_uploads,
+    format_bytes,
+    dir_size_bytes,
+    get_uploads_dir,
+)
+from app.config import UPLOADS_CLEANUP, AZURE_CONFIG
+from app.services.pymupdf_service import (
+    parse_with_pymupdf,
+    simple_page_dump,
+    extract_text as pymupdf_extract_text,
+)
 from app.services.pymupdf_kv import extract_text_pymupdf, postprocess_pymupdf
 
 
 st.set_page_config(page_title="Reducto + Azure Doc AI GUI", layout="wide")
 st.title("Reducto + Azure Doc AI GUI")
-st.caption("Upload a PDF → pick a page → click **Process with Reducto** or **Process with Azure AI**.")
+st.caption("Upload a PDF → pick a page → run a processor from the tabs.")
 
 st.sidebar.markdown("### Settings")
 st.sidebar.markdown("- Uses `REDUCTO_API_KEY`, `AZURE_DOC_AI_ENDPOINT`, `AZURE_DOC_AI_KEY` from env/.env.")
 st.sidebar.markdown("- Only the selected page is parsed for Reducto (saves cost/time).")
 
+# Azure model selection (overrides config at runtime)
+## Azure model/pages selection moved out of sidebar per user preference
+
 debug_panel()
 
-uploaded = st.file_uploader("Upload a PDF (saved locally)", type=["pdf"])  # type: ignore
-if uploaded is None:
-    st.info("👆 Upload a PDF to get started.")
-    st.stop()
 
-# Persist upload to a local folder (./uploads)
-pdf_path: Path = save_uploaded_file(uploaded)
-st.caption(f"Saved locally: {pdf_path}")
+# -----------------
+# Helper functions
+# -----------------
+def _count_pages_from_spec(spec: str | None, total_pages: int) -> int:
+    if not spec:
+        return 1
+    spec = spec.strip()
+    if not spec:
+        return 1
+    pages = set()
+    for part in spec.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if "-" in part:
+            a, b = part.split("-", 1)
+            try:
+                start = max(1, min(total_pages, int(a)))
+                end = max(1, min(total_pages, int(b)))
+            except ValueError:
+                continue
+            if end < start:
+                start, end = end, start
+            for p in range(start, end + 1):
+                pages.add(p)
+        else:
+            try:
+                p = max(1, min(total_pages, int(part)))
+                pages.add(p)
+            except ValueError:
+                continue
+    return max(1, len(pages) or 1)
+
+
+def _pages_list_from_spec(spec: str | None, total_pages: int) -> list[int]:
+    if not spec:
+        return []
+    spec = spec.strip()
+    if not spec:
+        return []
+    pages = set()
+    for part in spec.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if "-" in part:
+            a, b = part.split("-", 1)
+            try:
+                start = max(1, min(total_pages, int(a)))
+                end = max(1, min(total_pages, int(b)))
+            except ValueError:
+                continue
+            if end < start:
+                start, end = end, start
+            pages.update(range(start, end + 1))
+        else:
+            try:
+                p = max(1, min(total_pages, int(part)))
+                pages.add(p)
+            except ValueError:
+                continue
+    return sorted(pages)
+
+
+def run_azure_analysis(
+    pdf_path: Path,
+    page_number: int,
+    model_id: str,
+    pages: str | None = None,
+    prefer_docint: bool = False,
+):
+    """Analyze with Azure. Prefer Document Intelligence if requested, otherwise Form Recognizer.
+
+    Falls back between clients on errors (e.g., ModelNotFound).
+    Returns (result, elapsed_secs, model_id_used, pages_used).
+    """
+    pages_used = pages or str(int(page_number))
+    def _try_docint():
+        return parse_with_azure_docint(pdf_path, int(page_number), model_id=model_id, pages=pages)
+
+    def _try_fr():
+        return parse_with_azure(pdf_path, int(page_number), model_id=model_id, pages=pages)
+
+    order = (_try_docint, _try_fr) if prefer_docint else (_try_fr, _try_docint)
+    last_exc = None
+    for fn in order:
+        try:
+            t0 = perf_counter()
+            res = fn()
+            return res, (perf_counter() - t0), model_id, pages_used
+        except Exception as e:  # fall through to alternate client
+            last_exc = e
+            if "ModelNotFound" not in str(e) and "Resource not found" not in str(e):
+                # Non-model errors: keep propagating after trying both
+                continue
+    if last_exc:
+        raise last_exc
+
+
+def render_azure_outputs(result, page_number: int, label_prefix: str = "Azure"):
+    st.caption(f"⏱️ {label_prefix} timings shown above")
+    colA, colB = st.columns(2)
+    with colA:
+        st.markdown(f"#### Raw {label_prefix} Output")
+        az_raw = azure_to_dict(result)
+        st.json(az_raw)
+        st.download_button(
+            f"Download {label_prefix.lower()}_raw.json",
+            data=json.dumps(az_raw, ensure_ascii=False, indent=2),
+            file_name=f"{label_prefix.lower()}_raw_page{int(page_number)}.json",
+            mime="application/json",
+        )
+    with colB:
+        st.markdown(f"#### {label_prefix} Key-Values / Fields")
+        kv_t0 = perf_counter()
+        kv_dict = azure_kv_to_dict(result)
+        fields_dict = azure_fields_to_dict(result)
+        post_secs = perf_counter() - kv_t0
+        st.caption(f"Post-processing time: {_fmt_duration(post_secs)}")
+        st.markdown("- Key-Value Pairs")
+        st.json(kv_dict)
+        st.markdown("- Document Fields")
+        st.json(fields_dict)
+        st.download_button(
+            f"Download {label_prefix.lower()}_kv.json",
+            data=json.dumps(kv_dict, ensure_ascii=False, indent=2),
+            file_name=f"{label_prefix.lower()}_kv_page{int(page_number)}.json",
+            mime="application/json",
+        )
+        st.download_button(
+            f"Download {label_prefix.lower()}_fields.json",
+            data=json.dumps(fields_dict, ensure_ascii=False, indent=2),
+            file_name=f"{label_prefix.lower()}_fields_page{int(page_number)}.json",
+            mime="application/json",
+        )
+
+uploaded = st.file_uploader("Upload a PDF (saved locally)", type=["pdf"])  # type: ignore
+pdf_path: Path | None = None
+if uploaded is not None:
+    # Persist upload to a local folder (./uploads) and remember it
+    pdf_path = save_uploaded_file(uploaded)
+    st.session_state["pdf_path"] = str(pdf_path)
+    st.caption(f"Saved locally: {pdf_path}")
+else:
+    # Reuse last uploaded file if available
+    prev = st.session_state.get("pdf_path")
+    if prev and Path(prev).exists():
+        pdf_path = Path(prev)
+        st.caption(f"Using previous upload: {pdf_path}")
+    else:
+        st.info("👆 Upload a PDF to get started.")
+        st.stop()
 
 # Housekeeping: clean uploads according to policy
 if UPLOADS_CLEANUP.get("enabled", False):
@@ -100,18 +260,214 @@ with col_left:
         value=1,
         step=1,
     )
-    c1, c2 = st.columns(2)
-    with c1:
-        do_process = st.button("Process with Reducto", type="primary")
-    with c2:
-        do_process_azure = st.button("Process with Azure AI")
-    do_process_pymupdf = st.button("Process with PyMuPDF (local)")
+    # Processing triggers will be shown in tabs below
+    do_process = False
+    do_process_azure = False
+    do_process_pymupdf = False
+
+    # Consistent options panels
+    with st.expander("Reducto Options", expanded=False):
+        r_col1, r_col2 = st.columns(2)
+        with r_col1:
+            red_start = st.number_input("Start page", min_value=1, max_value=max(1, page_count), value=int(page_number), step=1, key="red_start")
+        with r_col2:
+            red_end = st.number_input("End page", min_value=1, max_value=max(1, page_count), value=int(page_number), step=1, key="red_end")
+        run_reducto_adv = st.button("Run Reducto", type="primary", key="run_reducto_adv")
+        if run_reducto_adv:
+            st.session_state["use_reducto_range"] = True
+            st.session_state["reducto_start_page"] = int(red_start)
+            st.session_state["reducto_end_page"] = int(red_end)
+            # trigger execution below
+            do_process = True
+
+    with st.expander("Azure AI Options", expanded=False):
+        a_col1, a_col2 = st.columns(2)
+        with a_col1:
+            az_model_opt = st.text_input(
+                "Model id",
+                value=st.session_state.get("azure_default_model", AZURE_CONFIG.get("model_id", "prebuilt-document")),
+                help="e.g., prebuilt-document, prebuilt-invoice, or a custom model id",
+                key="az_default_model_input",
+            )
+        with a_col2:
+            az_pages_opt = st.text_input(
+                "Pages (optional)",
+                value=st.session_state.get("azure_default_pages", ""),
+                help="Azure pages string like 6 or 18-19 or 1,3,5-7",
+                key="az_default_pages_input",
+            )
+        run_azure_adv = st.button("Run Azure AI", type="primary", key="run_azure_adv")
+        if run_azure_adv:
+            st.session_state["azure_default_model"] = az_model_opt.strip()
+            st.session_state["azure_default_pages"] = az_pages_opt.strip()
+            do_process_azure = True
+
+    with st.expander("PyMuPDF Options", expanded=False):
+        scope_all_opt = st.checkbox(
+            "Analyze all pages (text + heuristics)",
+            value=st.session_state.get("pym_scope_all", False),
+            help="Unchecked: use the selected page only. Checked: use the entire document.",
+            key="pym_scope_all_opt",
+        )
+        run_pymupdf_adv = st.button("Run PyMuPDF", type="primary", key="run_pymupdf_adv")
+        if run_pymupdf_adv:
+            st.session_state["pym_scope_all"] = bool(scope_all_opt)
+            do_process_pymupdf = True
 
 # Always show a page preview (cheap UX win)
 png_bytes = render_pdf_page_png_bytes(pdf_path, int(page_number), zoom=2.0)
 with col_right:
     st.subheader(f"PDF Preview — Page {int(page_number)}")
     st.image(png_bytes, caption=f"Page {int(page_number)}", use_container_width=True)
+
+## (helpers defined above)
+
+# Sidebar: Azure simple cost estimator
+st.sidebar.markdown("#### Azure Cost Estimate")
+per_page_price = st.sidebar.number_input(
+    "Price per page ($)", min_value=0.0, value=0.10, step=0.01, format="%.2f"
+)
+def _est_line(label: str, pages_spec: str | None):
+    n = _count_pages_from_spec(pages_spec, page_count)
+    cost = n * per_page_price
+    st.sidebar.write(f"{label}: {n} page(s) → ${cost:.2f}")
+_est_line("Default Azure", st.session_state.get("azure_default_pages") or str(int(page_number)))
+_est_line("Azure 1040", st.session_state.get("azure_1040_pages") or str(int(page_number)))
+
+# Tabs for processors
+tab_red, tab_az, tab_1040, tab_pym = st.tabs([
+    "Reducto", "Azure AI", "Azure 1040", "PyMuPDF",
+])
+
+with tab_red:
+    st.markdown("### Reducto")
+    r_col1, r_col2 = st.columns(2)
+    with r_col1:
+        red_start = st.number_input("Start page", min_value=1, max_value=max(1, page_count), value=int(page_number), step=1, key="red_start_tab")
+    with r_col2:
+        red_end = st.number_input("End page", min_value=1, max_value=max(1, page_count), value=int(page_number), step=1, key="red_end_tab")
+    c_run_r1, c_run_r2 = st.columns(2)
+    with c_run_r1:
+        run_red_page = st.button("Run Reducto (selected page)", type="primary", key="btn_red_page")
+    with c_run_r2:
+        run_red_range = st.button("Run Reducto (range)", type="primary", key="btn_red_range")
+    if run_red_range:
+        st.session_state["use_reducto_range"] = True
+        st.session_state["reducto_start_page"] = int(red_start)
+        st.session_state["reducto_end_page"] = int(red_end)
+        do_process = True
+    elif run_red_page:
+        st.session_state["use_reducto_range"] = False
+        do_process = True
+
+with tab_az:
+    st.markdown("### Azure Document AI")
+    a_col1, a_col2 = st.columns(2)
+    with a_col1:
+        az_model_opt = st.text_input(
+            "Model id",
+            value=st.session_state.get("azure_default_model", AZURE_CONFIG.get("model_id", "prebuilt-document")),
+            help="e.g., prebuilt-document, prebuilt-invoice, or a custom model id",
+            key="az_model_tab",
+        )
+    with a_col2:
+        az_pages_opt = st.text_input(
+            "Pages (optional)",
+            value=st.session_state.get("azure_default_pages", ""),
+            help="Azure pages string like 6 or 18-19 or 1,3,5-7",
+            key="az_pages_tab",
+        )
+    if st.button("Run Azure AI", type="primary", key="btn_az_default"):
+        st.session_state["azure_default_model"] = az_model_opt.strip()
+        st.session_state["azure_default_pages"] = az_pages_opt.strip()
+        do_process_azure = True
+
+with tab_1040:
+    st.markdown("### Azure 1040 (prebuilt)")
+    default_model_1040 = AZURE_CONFIG.get("model_id_1040", "prebuilt-tax.us.1040")
+    # Keep only 1040 by default; allow Custom for future additions
+    known_tax_models = [
+        "prebuilt-tax.us.1040",
+        "Custom…",
+    ]
+    prev_model = st.session_state.get("azure_1040_model", default_model_1040)
+    initial_choice = prev_model if prev_model in known_tax_models else "Custom…"
+    choice = st.selectbox(
+        "Select model",
+        options=known_tax_models,
+        index=known_tax_models.index(initial_choice),
+        help="Pick a prebuilt tax model or choose Custom to enter your own",
+        key="select_model_1040_tab",
+    )
+    if choice == "Custom…":
+        model_1040 = st.text_input(
+            "Custom model id",
+            value=prev_model if prev_model not in known_tax_models else default_model_1040,
+            help="Exact model id as used in your scripts/portal",
+            key="input_model_1040_tab",
+        )
+    else:
+        model_1040 = choice
+    if model_1040 == "prebuilt-document":
+        st.info("'prebuilt-document' usually does not populate document.fields; check Key-Value Pairs instead.")
+    pages_1040 = st.text_input(
+        "1040 pages (optional)",
+        value=st.session_state.get("azure_1040_pages", ""),
+        help="Azure pages string like 18-19 or 1,3,5-7. If empty, uses the selected page above.",
+        key="input_pages_1040_tab",
+    )
+    if st.button("Run Azure 1040", type="primary", key="btn_az_1040"):
+        # Persist choices for cost estimator and reruns
+        st.session_state["azure_1040_model"] = model_1040
+        st.session_state["azure_1040_pages"] = pages_1040
+        try:
+            if pages_1040.strip():
+                st.warning(f"Using static pages override '{pages_1040.strip()}', ignoring selected page {int(page_number)}.")
+
+            with st.status("Analyzing with Azure 1040 prebuilt model…", expanded=False):
+                try:
+                    azure_1040_result, azure_1040_secs, model_used, pages_used = run_azure_analysis(
+                        pdf_path, int(page_number), model_id=model_1040, pages=pages_1040.strip() or None, prefer_docint=True
+                    )
+                except Exception as e:
+                    # Fallback to default model if 1040 model is not found
+                    if "ModelNotFound" in str(e) or "Resource not found" in str(e):
+                        fallback_model = AZURE_CONFIG.get("model_id", "prebuilt-document")
+                        azure_1040_result, azure_1040_secs, model_used, pages_used = run_azure_analysis(
+                            pdf_path, int(page_number), model_id=fallback_model, pages=pages_1040.strip() or None, prefer_docint=True
+                        )
+                        st.info(f"Fell back to model: {fallback_model}")
+                    else:
+                        raise
+
+            st.caption(f"Azure analyzed pages: {pages_used}")
+            st.caption(f"Model: {model_used} • Pages: {pages_used}")
+            st.caption(f"⏱️ Azure 1040 timings — API: {_fmt_duration(azure_1040_secs)}")
+            render_azure_outputs(azure_1040_result, int(page_number), label_prefix="Azure 1040")
+        except Exception as e:
+            st.error("Azure 1040 extraction failed.")
+            st.code(f"{type(e).__name__}: {e}")
+            with st.expander("Full traceback"):
+                st.exception(traceback.format_exc())
+
+with tab_pym:
+    st.markdown("### PyMuPDF (local)")
+    scope_all_opt = st.checkbox(
+        "Analyze all pages (text + heuristics)",
+        value=st.session_state.get("pym_scope_all", False),
+        help="Unchecked: use the selected page only. Checked: use the entire document.",
+        key="pym_scope_all_tab",
+    )
+    pym_pages_spec = st.text_input(
+        "Pages (optional)",
+        value=st.session_state.get("pym_pages_spec", ""),
+        help="Page list/ranges like 1,3,5-7. If set, overrides the toggle and selected page.",
+        key="pym_pages_spec_tab",
+    )
+    if st.button("Run PyMuPDF", type="primary", key="btn_pym"):
+        st.session_state["pym_scope_all"] = bool(scope_all_opt)
+        st.session_state["pym_pages_spec"] = pym_pages_spec.strip()
+        do_process_pymupdf = True
 
 # -------- Reducto path --------
 if do_process:
@@ -133,7 +489,12 @@ if do_process:
         with st.status("Parsing with Reducto…", expanded=False) as status:
             try:
                 t0 = perf_counter()
-                parsed = parse_document(client, pdf_path, int(page_number))
+                if st.session_state.get("use_reducto_range"):
+                    s = int(st.session_state.get("reducto_start_page", int(page_number)))
+                    e = int(st.session_state.get("reducto_end_page", int(page_number)))
+                    parsed = parse_document_range(client, pdf_path, s, e)
+                else:
+                    parsed = parse_document(client, pdf_path, int(page_number))
                 reducto_api_secs = perf_counter() - t0
                 status.update(label="Parsing complete", state="complete")
             except Exception as e:
@@ -258,67 +619,54 @@ if do_process_azure:
     st.subheader("Azure Document AI Output")
 
     try:
-        with st.status("Analyzing with Azure Document Intelligence…", expanded=False) as status:
-            try:
-                az_t0 = perf_counter()
-                azure_result = parse_with_azure(pdf_path, int(page_number))
-                azure_api_secs = perf_counter() - az_t0
-                status.update(label=f"Azure analysis complete (page {int(page_number)})", state="complete")
-            except Exception as e:
-                status.update(label="Azure analysis failed", state="error")
-                st.error("Cannot call Azure Document Intelligence — may be blocked by policy or misconfigured.")
-                st.caption("Error details (copyable):")
-                st.code(f"{type(e).__name__}: {e}")
-                with st.expander("Full traceback"):
-                    st.exception(traceback.format_exc())
-                st.stop()
+        _model = st.session_state.get("azure_default_model", AZURE_CONFIG.get("model_id", "prebuilt-document"))
+        _pages = st.session_state.get("azure_default_pages") or None
+        if _pages:
+            st.warning(f"Using static pages override '{_pages}', ignoring selected page {int(page_number)}.")
 
-        st.caption(f"Azure analyzed page: {int(page_number)}")
+        with st.status("Analyzing with Azure Document Intelligence…", expanded=False):
+            azure_result, azure_api_secs, model_used, pages_used = run_azure_analysis(
+                pdf_path, int(page_number), model_id=_model, pages=_pages, prefer_docint=False
+            )
+        st.caption(f"Azure analyzed pages: {pages_used}")
+        st.caption(f"Model: {model_used} • Pages: {pages_used}")
         st.caption(f"⏱️ Azure timings — API: {_fmt_duration(azure_api_secs)}")
-
-        colA, colB = st.columns(2)
-
-        with colA:
-            st.markdown("#### Raw Azure Output")
-            az_raw = azure_to_dict(azure_result)
-            st.json(az_raw)
-            st.download_button(
-                "Download azure_raw.json",
-                data=json.dumps(az_raw, ensure_ascii=False, indent=2),
-                file_name=f"azure_raw_page{int(page_number)}.json",
-                mime="application/json",
-            )
-
-        with colB:
-            st.markdown("#### Azure Key-Value Pairs (flattened)")
-            kv_t0 = perf_counter()
-            kv_dict = azure_kv_to_dict(azure_result)
-            azure_post_secs = perf_counter() - kv_t0
-            st.caption(f"Post-processing time: {_fmt_duration(azure_post_secs)}")
-            st.json(kv_dict)
-            st.download_button(
-                "Download azure_kv.json",
-                data=json.dumps(kv_dict, ensure_ascii=False, indent=2),
-                file_name=f"azure_kv_page{int(page_number)}.json",
-                mime="application/json",
-            )
-
+        render_azure_outputs(azure_result, int(page_number), label_prefix="Azure")
     except Exception as e:
-        st.error(f"Azure Doc AI error: {e}")
-        st.exception(traceback.format_exc())
+        st.error("Azure Doc AI error")
+        st.code(f"{type(e).__name__}: {e}")
+        with st.expander("Full traceback"):
+            st.exception(traceback.format_exc())
 
-# If neither button clicked, just show preview + wait for action
-if not (do_process or do_process_azure):
-    st.info("Select a page and click **Process with Reducto** or **Process with Azure AI**.")
+# If nothing has been triggered yet, prompt user
+if not (do_process or do_process_azure or do_process_pymupdf):
+    st.info("Open a tab above, adjust options, and click Run.")
 
 # -------- PyMuPDF (local) path --------
 if do_process_pymupdf:
     st.divider()
     st.subheader("PyMuPDF Output (local extraction)")
     try:
-        # 1) Normalized plain text from PyMuPDF (all pages)
+        # Scope is controlled from the PyMuPDF tab options (pages spec > all-pages toggle > selected page)
+        scope_all = bool(st.session_state.get("pym_scope_all", False))
+        pages_spec = (st.session_state.get("pym_pages_spec") or "").strip()
+        pages_list = _pages_list_from_spec(pages_spec, page_count) if pages_spec else []
+        if pages_list:
+            scope_label = f"pages {','.join(map(str, pages_list))}"
+        else:
+            scope_label = 'all pages' if scope_all else 'selected page'
+        st.caption(
+            f"PyMuPDF scope: {scope_label} • Selected page: {int(page_number)}"
+        )
+        # 1) Normalized plain text from PyMuPDF
         pm_t0 = perf_counter()
-        normalized_text = extract_text_pymupdf(pdf_path)
+        if pages_list:
+            parts = [pymupdf_extract_text(pdf_path, int(p)) for p in pages_list]
+            normalized_text = "\n".join(parts)
+        elif scope_all:
+            normalized_text = extract_text_pymupdf(pdf_path)
+        else:
+            normalized_text = pymupdf_extract_text(pdf_path, int(page_number))
         pymupdf_api_secs = perf_counter() - pm_t0
         # 2) Heuristic KVs derived from that text
         pm_pp0 = perf_counter()
@@ -349,7 +697,7 @@ if do_process_pymupdf:
                 mime="application/json",
             )
 
-        with st.expander("Advanced: Raw PyMuPDF structures"):
+        with st.expander("Advanced: Raw PyMuPDF structures (selected page)"):
             adv_t0 = perf_counter()
             result = parse_with_pymupdf(pdf_path, int(page_number))
             adv_secs = perf_counter() - adv_t0

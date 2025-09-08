@@ -40,6 +40,8 @@ REDUCTO_CONFIG = {
 # You may change model IDs or add feature flags here.
 AZURE_CONFIG = {
     "model_id": "prebuilt-document",
+    # Prebuilt model for US IRS Form 1040 (if available in your region)
+    "model_id_1040": "prebuilt-tax.us.1040",
 }
 
 
