@@ -1,0 +1,518 @@
+{
+  "TaxYear": {
+    "type": "string",
+    "valueString": "2024",
+    "content": "2024",
+    "boundingRegions": [
+      {
+        "pageNumber": 1,
+        "polygon": [
+          7.273,
+          0.6097,
+          7.6978,
+          0.6103,
+          7.6976,
+          0.7851,
+          7.2728,
+          0.7845
+        ]
+      }
+    ],
+    "confidence": 0.972,
+    "spans": [
+      {
+        "offset": 77,
+        "length": 4
+      }
+    ]
+  },
+  "Taxpayer": {
+    "type": "object",
+    "valueObject": {
+      "SSN": {
+        "type": "string",
+        "valueString": "123-65-4987",
+        "content": "123654987",
+        "boundingRegions": [
+          {
+            "pageNumber": 1,
+            "polygon": [
+              6.9705,
+              3.4634,
+              7.8193,
+              3.4623,
+              7.8195,
+              3.6083,
+              6.9707,
+              3.6093
+            ]
+          }
+        ],
+        "confidence": 0.843,
+        "spans": [
+          {
+            "offset": 596,
+            "length": 9
+          }
+        ]
+      },
+      "LastName": {
+        "type": "string",
+        "valueString": "GenInfo",
+        "content": "GenInfo",
+        "boundingRegions": [
+          {
+            "pageNumber": 1,
+            "polygon": [
+              0.9716,
+              1.1408,
+              1.6325,
+              1.1391,
+              1.6329,
+              1.2821,
+              0.972,
+              1.2838
+            ]
+          }
+        ],
+        "confidence": 0.847,
+        "spans": [
+          {
+            "offset": 93,
+            "length": 7
+          }
+        ]
+      },
+      "FirstNameAndInitials": {
+        "type": "string",
+        "valueString": "Fname",
+        "content": "Fname",
+        "boundingRegions": [
+          {
+            "pageNumber": 1,
+            "polygon": [
+              0.3641,
+              1.1446,
+              0.8403,
+              1.1437,
+              0.8405,
+              1.2815,
+              0.3643,
+              1.2824
+            ]
+          }
+        ],
+        "confidence": 0.509,
+        "spans": [
+          {
+            "offset": 87,
+            "length": 5
+          }
+        ]
+      },
+      "Address": {
+        "type": "address",
+        "content": "444 mainstreet\napt24\nIron Mountain\nMI\nMichigan\n42929",
+        "boundingRegions": [
+          {
+            "pageNumber": 1,
+            "polygon": [
+              3.7706,
+              5.2904,
+              7.8379,
+              5.3037,
+              7.8357,
+              5.9516,
+              3.7685,
+              5.9383
+            ]
+          }
+        ],
+        "confidence": 0.661,
+        "spans": [
+          {
+            "offset": 857,
+            "length": 20
+          },
+          {
+            "offset": 888,
+            "length": 13
+          },
+          {
+            "offset": 911,
+            "length": 11
+          },
+          {
+            "offset": 942,
+            "length": 5
+          }
+        ],
+        "valueAddress": {
+          "houseNumber": "444",
+          "road": "mainstreet",
+          "postalCode": "42929",
+          "city": "Iron Mountain",
+          "state": "Michigan",
+          "streetAddress": "444 mainstreet Apt. apt24",
+          "unit": "Apt. apt24"
+        }
+      },
+      "ForeignCountryName": {
+        "type": "string",
+        "valueString": "Falkland Islands (Isla",
+        "content": "Falkland Islands (Isla",
+        "boundingRegions": [
+          {
+            "pageNumber": 1,
+            "polygon": [
+              5.6646,
+              4.3014,
+              7.8027,
+              4.3019,
+              7.8027,
+              4.4509,
+              5.6646,
+              4.4504
+            ]
+          }
+        ],
+        "confidence": 0.312,
+        "spans": [
+          {
+            "offset": 708,
+            "length": 22
+          }
+        ]
+      },
+      "ForeignProvinceStateOrCounty": {
+        "type": "string",
+        "confidence": 0.732
+      },
+      "ForeignPostalCode": {
+        "type": "string",
+        "valueString": "42929",
+        "content": "42929",
+        "boundingRegions": [
+          {
+            "pageNumber": 1,
+            "polygon": [
+              6.1718,
+              5.8028,
+              6.6462,
+              5.8022,
+              6.6464,
+              5.9456,
+              6.172,
+              5.9462
+            ]
+          }
+        ],
+        "confidence": 0.858,
+        "spans": [
+          {
+            "offset": 942,
+            "length": 5
+          }
+        ]
+      }
+    }
+  },
+  "Spouse": {
+    "type": "object",
+    "valueObject": {
+      "SSN": {
+        "type": "string",
+        "confidence": 0.821
+      },
+      "LastName": {
+        "type": "string",
+        "confidence": 0.98
+      },
+      "FirstNameAndInitials": {
+        "type": "string",
+        "confidence": 0.862
+      }
+    }
+  },
+  "Dependents": {
+    "type": "array",
+    "valueArray": [
+      {
+        "type": "object",
+        "valueObject": {
+          "Name": {
+            "type": "string",
+            "confidence": 0.995
+          },
+          "SSN": {
+            "type": "string",
+            "confidence": 0.995
+          },
+          "RelationshipToFiler": {
+            "type": "string",
+            "confidence": 0.995
+          },
+          "CreditType": {
+            "type": "selectionGroup",
+            "content": " ",
+            "confidence": 0.995
+          }
+        }
+      },
+      {
+        "type": "object",
+        "valueObject": {
+          "Name": {
+            "type": "string",
+            "confidence": 0.995
+          },
+          "SSN": {
+            "type": "string",
+            "confidence": 0.995
+          },
+          "RelationshipToFiler": {
+            "type": "string",
+            "confidence": 0.995
+          },
+          "CreditType": {
+            "type": "selectionGroup",
+            "content": " ",
+            "confidence": 0.995
+          }
+        }
+      },
+      {
+        "type": "object",
+        "valueObject": {
+          "Name": {
+            "type": "string",
+            "confidence": 0.995
+          },
+          "SSN": {
+            "type": "string",
+            "confidence": 0.995
+          },
+          "RelationshipToFiler": {
+            "type": "string",
+            "confidence": 0.995
+          },
+          "CreditType": {
+            "type": "selectionGroup",
+            "content": " ",
+            "confidence": 0.995
+          }
+        }
+      },
+      {
+        "type": "object",
+        "valueObject": {
+          "Name": {
+            "type": "string",
+            "confidence": 0.995
+          },
+          "SSN": {
+            "type": "string",
+            "confidence": 0.995
+          },
+          "RelationshipToFiler": {
+            "type": "string",
+            "confidence": 0.995
+          },
+          "CreditType": {
+            "type": "selectionGroup",
+            "content": " ",
+            "confidence": 0.995
+          }
+        }
+      }
+    ]
+  },
+  "FilingStatus": {
+    "type": "selectionGroup",
+    "content": "    ",
+    "confidence": 0.981
+  },
+  "NameOfSpouseOrQualifyingPerson": {
+    "type": "string",
+    "confidence": 0.939
+  },
+  "PresidentialElectionCampaign": {
+    "type": "selectionGroup",
+    "content": " ",
+    "confidence": 0.987
+  },
+  "DigitalAssets": {
+    "type": "selectionGroup",
+    "content": " ",
+    "confidence": 0.634
+  },
+  "ClaimStatus": {
+    "type": "selectionGroup",
+    "content": "  ",
+    "confidence": 0.987
+  },
+  "TaxpayerAgeBlindeness": {
+    "type": "selectionGroup",
+    "content": " ",
+    "confidence": 0.987
+  },
+  "SpouseAgeBlindeness": {
+    "type": "selectionGroup",
+    "content": " ",
+    "confidence": 0.988
+  },
+  "MoreThanFourDependents": {
+    "type": "boolean",
+    "confidence": 0.988,
+    "valueBoolean": false
+  },
+  "Box1a": {
+    "type": "string",
+    "confidence": 0.954
+  },
+  "Box1b": {
+    "type": "string",
+    "confidence": 0.977
+  },
+  "Box1c": {
+    "type": "string",
+    "confidence": 0.953
+  },
+  "Box1d": {
+    "type": "string",
+    "confidence": 0.978
+  },
+  "Box1e": {
+    "type": "string",
+    "confidence": 0.976
+  },
+  "Box1f": {
+    "type": "string",
+    "confidence": 0.975
+  },
+  "Box1g": {
+    "type": "string",
+    "confidence": 0.975
+  },
+  "Box1h": {
+    "type": "string",
+    "confidence": 0.977
+  },
+  "Box1i": {
+    "type": "string",
+    "confidence": 0.975
+  },
+  "Box1z": {
+    "type": "string",
+    "confidence": 0.939
+  },
+  "Box2a": {
+    "type": "string",
+    "confidence": 0.88
+  },
+  "Box2b": {
+    "type": "string",
+    "confidence": 0.978
+  },
+  "Box3a": {
+    "type": "string",
+    "confidence": 0.975
+  },
+  "Box3b": {
+    "type": "string",
+    "confidence": 0.978
+  },
+  "Box4a": {
+    "type": "string",
+    "confidence": 0.483
+  },
+  "Box4b": {
+    "type": "number",
+    "valueNumber": 24131411,
+    "content": "24131411",
+    "boundingRegions": [
+      {
+        "pageNumber": 1,
+        "polygon": [
+          5.8625,
+          4.1313,
+          6.6231,
+          4.1303,
+          6.6233,
+          4.2722,
+          5.8627,
+          4.2732
+        ]
+      }
+    ],
+    "confidence": 0.926,
+    "spans": [
+      {
+        "offset": 679,
+        "length": 8
+      }
+    ]
+  },
+  "Box5a": {
+    "type": "string",
+    "confidence": 0.973
+  },
+  "Box5b": {
+    "type": "string",
+    "confidence": 0.977
+  },
+  "Box6a": {
+    "type": "string",
+    "confidence": 0.933
+  },
+  "Box6b": {
+    "type": "string",
+    "confidence": 0.975
+  },
+  "Box6cCheckbox": {
+    "type": "boolean",
+    "confidence": 0.984,
+    "valueBoolean": false
+  },
+  "Box7Checkbox": {
+    "type": "boolean",
+    "confidence": 0.651,
+    "valueBoolean": false
+  },
+  "Box7": {
+    "type": "string",
+    "confidence": 0.933
+  },
+  "Box8": {
+    "type": "string",
+    "confidence": 0.975
+  },
+  "Box9": {
+    "type": "string",
+    "confidence": 0.536
+  },
+  "Box10": {
+    "type": "string",
+    "confidence": 0.953
+  },
+  "Box11": {
+    "type": "string",
+    "confidence": 0.834
+  },
+  "Box12": {
+    "type": "string",
+    "confidence": 0.969
+  },
+  "Box13": {
+    "type": "string",
+    "confidence": 0.755
+  },
+  "Box14": {
+    "type": "string",
+    "confidence": 0.954
+  },
+  "Box15": {
+    "type": "string",
+    "confidence": 0.954
+  }
+}
