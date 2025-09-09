@@ -160,14 +160,91 @@ def azure_to_dict(result) -> dict:
     return _to_native(result)
 
 
+def _field_to_simple(value_obj) -> str | int | float | bool | None:
+    """Best-effort to extract a simple scalar from a DocumentField-like object.
+
+    Prefers typed value_* attributes (e.g., value_string), then .content.
+    """
+    if value_obj is None:
+        return None
+    # Prefer common typed attributes
+    for attr in (
+        "value_string",
+        "value_date",
+        "value_time",
+        "value_phone_number",
+        "value_currency",
+        "value_number",
+        "value_integer",
+        "value_boolean",
+    ):
+        if hasattr(value_obj, attr):
+            try:
+                v = getattr(value_obj, attr)
+                if v is not None:
+                    # Currency is an object sometimes; fall back to str
+                    return v if isinstance(v, (str, int, float, bool)) else str(v)
+            except Exception:
+                pass
+    # Fallback to content
+    try:
+        c = getattr(value_obj, "content", None)
+        if c is not None:
+            return c
+    except Exception:
+        pass
+    # Last resort: to_dict/as_dict/str
+    try:
+        return _to_native(value_obj)
+    except Exception:
+        return None
+
+
 def azure_kv_to_dict(result) -> dict:
-    kv_dict = {}
-    for kv_pair in result.key_value_pairs:
-        key_text = kv_pair.key.content if kv_pair.key else None
-        value_text = kv_pair.value.content if kv_pair.value else None
-        if key_text:
-            kv_dict[key_text] = value_text
-    return kv_dict
+    """Return key-value pairs from Azure output.
+
+    - If result.key_value_pairs exist, return them (standard behavior).
+    - Otherwise, flatten document.fields into a simple dict of name -> value
+      (single document) to match azuretest.py expectations for prebuilt-tax models.
+    - If multiple documents are present, prefix with doc index (e.g., doc0.Name).
+    """
+    # Primary path: use key_value_pairs when available
+    try:
+        kvs = getattr(result, "key_value_pairs", None)
+        if kvs:
+            out: dict[str, str | None] = {}
+            for kv_pair in kvs:
+                key_text = kv_pair.key.content if kv_pair.key else None
+                value_text = kv_pair.value.content if kv_pair.value else None
+                if key_text:
+                    out[key_text] = value_text
+            if out:
+                return out
+    except Exception:
+        pass
+
+    # Fallback: flatten fields per document (Document Intelligence 1040 flow)
+    try:
+        docs = getattr(result, "documents", None) or []
+        if not docs:
+            return {}
+        if len(docs) == 1:
+            fields = getattr(docs[0], "fields", {}) or {}
+            out: dict[str, str | int | float | bool | None] = {}
+            if isinstance(fields, dict):
+                for name, field in fields.items():
+                    out[str(name)] = _field_to_simple(field)
+            return out
+        # Multiple docs: prefix keys
+        out: dict[str, str | int | float | bool | None] = {}
+        for i, doc in enumerate(docs):
+            fields = getattr(doc, "fields", {}) or {}
+            if isinstance(fields, dict):
+                for name, field in fields.items():
+                    out[f"doc{i}.{name}"] = _field_to_simple(field)
+        return out
+    except Exception:
+        return {}
 
 
 def azure_fields_to_dict(result):
