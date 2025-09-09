@@ -1,9 +1,13 @@
 from pathlib import Path
 import os
+import sys
 
 from dotenv import load_dotenv
-import httpx
-from reducto import Reducto, ReductoError
+from reducto import ReductoError
+
+# Ensure project root is importable for `app.services`
+sys.path.append(str(Path(__file__).resolve().parents[2]))
+from app.services.reducto_service import create_client
 
 # Ensure env vars from .env are loaded for local runs
 load_dotenv()
@@ -20,17 +24,8 @@ if not api_key:
         "REDUCTO_API_KEY is not set. Add it to .env or export it before running."
     )
 
-http_client = None
-if USE_PROXY and PROXY_HOST:
-    proxy_url = f"http://{PROXY_HOST}"
-    # Ensure both http and https requests use the proxy
-    proxies = {
-        "http://": proxy_url,
-        "https://": proxy_url,
-    }
-    http_client = httpx.Client(proxies=proxies, follow_redirects=True)
-
-client = Reducto(api_key=api_key, http_client=http_client)
+proxy_url = f"http://{PROXY_HOST}" if (USE_PROXY and PROXY_HOST) else None
+client = create_client(use_proxy=bool(proxy_url), proxy_url=proxy_url)
 
 schema = {
   "$schema": "https://json-schema.org/draft/2020-12/schema",

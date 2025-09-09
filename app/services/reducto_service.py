@@ -7,19 +7,27 @@ from typing import Iterable, List, Dict, Any
 
 from dotenv import load_dotenv
 from reducto import Reducto, ReductoError
+import httpx
 
 from app.config import OPTIONS, ADVANCED_OPTIONS, EXPERIMENTAL_OPTIONS
 
 
-def create_client() -> Reducto:
-    """Create a Reducto client using an API key from .env or environment."""
+def create_client(*, use_proxy: bool = False, proxy_url: str | None = None) -> Reducto:
+    """Create a Reducto client using an API key from .env or environment.
+
+    - use_proxy: when True and proxy_url provided, route traffic via proxy.
+    - proxy_url: full proxy URL string, e.g. "http://host:port".
+    """
     load_dotenv()
     api_key = os.getenv("REDUCTO_API_KEY")
     if not api_key:
         raise ReductoError(
             "REDUCTO_API_KEY is not set. Provide it via environment variable or .env file."
         )
-    return Reducto(api_key=api_key)
+    http_client = None
+    if use_proxy and proxy_url:
+        http_client = httpx.Client(proxy=proxy_url, follow_redirects=True)
+    return Reducto(api_key=api_key, http_client=http_client)
 
 
 def parse_document(client: Reducto, file_path: Path, page_number: int) -> dict:
