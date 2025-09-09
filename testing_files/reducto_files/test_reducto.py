@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 import sys
+import socket
 
 from dotenv import load_dotenv
 from reducto import ReductoError
@@ -24,8 +25,26 @@ if not api_key:
         "REDUCTO_API_KEY is not set. Add it to .env or export it before running."
     )
 
-proxy_url = f"http://{PROXY_HOST}" if (USE_PROXY and PROXY_HOST) else None
-client = create_client(use_proxy=bool(proxy_url), proxy_url=proxy_url)
+proxy_url = None
+if USE_PROXY and PROXY_HOST:
+    host, _, port = PROXY_HOST.partition(":")
+    try:
+        # Basic DNS reachability check; if it fails, skip proxy
+        socket.getaddrinfo(host, int(port) if port else 3128)
+        proxy_url = f"http://{host}:{port or '3128'}"
+    except Exception:
+        print(f"Proxy host not resolvable, bypassing proxy: {host}")
+        proxy_url = None
+
+print(f"Using proxy: {proxy_url or 'DIRECT'}")
+client = create_client(
+    use_proxy=bool(proxy_url),
+    proxy_url=proxy_url,
+    connect_timeout=10.0,
+    read_timeout=60.0,
+    write_timeout=30.0,
+    max_retries=1,
+)
 
 schema = {
   "$schema": "https://json-schema.org/draft/2020-12/schema",

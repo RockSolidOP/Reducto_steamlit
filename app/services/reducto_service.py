@@ -12,7 +12,15 @@ import httpx
 from app.config import OPTIONS, ADVANCED_OPTIONS, EXPERIMENTAL_OPTIONS
 
 
-def create_client(*, use_proxy: bool = False, proxy_url: str | None = None) -> Reducto:
+def create_client(
+    *,
+    use_proxy: bool = False,
+    proxy_url: str | None = None,
+    connect_timeout: float = 10.0,
+    read_timeout: float = 60.0,
+    write_timeout: float = 30.0,
+    max_retries: int = 1,
+) -> Reducto:
     """Create a Reducto client using an API key from .env or environment.
 
     - use_proxy: when True and proxy_url provided, route traffic via proxy.
@@ -24,10 +32,25 @@ def create_client(*, use_proxy: bool = False, proxy_url: str | None = None) -> R
         raise ReductoError(
             "REDUCTO_API_KEY is not set. Provide it via environment variable or .env file."
         )
-    http_client = None
+    # Always create an explicit httpx client so we can control env proxy usage and timeouts.
+    # httpx 0.28+ requires either a default or all four explicit timeouts
+    timeout = httpx.Timeout(
+        connect=connect_timeout,
+        read=read_timeout,
+        write=write_timeout,
+        pool=connect_timeout,
+    )
+    client_kwargs = {
+        "follow_redirects": True,
+        "timeout": timeout,
+        # Disable environment proxy vars so we can control proxy explicitly via proxy_url
+        "trust_env": False,
+    }
     if use_proxy and proxy_url:
-        http_client = httpx.Client(proxy=proxy_url, follow_redirects=True)
-    return Reducto(api_key=api_key, http_client=http_client)
+        client_kwargs["proxy"] = proxy_url
+    http_client = httpx.Client(**client_kwargs)
+
+    return Reducto(api_key=api_key, http_client=http_client, max_retries=max_retries, timeout=timeout)
 
 
 def parse_document(client: Reducto, file_path: Path, page_number: int) -> dict:
