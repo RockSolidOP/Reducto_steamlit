@@ -52,12 +52,26 @@ python -c "from dotenv import load_dotenv; import os; load_dotenv(); print(bool(
 
 ## Run the Streamlit App
 
+Recommended (modular entrypoint):
+
+```
+streamlit run app/main.py
+```
+
+Legacy trampoline (also supported):
+
 ```
 streamlit run app.py
 ```
 
 - Open http://localhost:8501
 - Upload a PDF and try Reducto and Azure analysis
+
+Required environment variables (names only): `REDUCTO_API_KEY`, `AZURE_DOC_AI_ENDPOINT`, `AZURE_DOC_AI_KEY`.
+
+Notes:
+- Keep your `.env` untracked (see `.gitignore`).
+- Local development may rely on `python-dotenv` to load environment variables.
 
 ## Quick Smoke Test (CLI)
 
@@ -128,4 +142,3 @@ Open http://localhost:8501 in your browser.
 ## License
 
 Proprietary code. Do not redistribute without permission.
-
