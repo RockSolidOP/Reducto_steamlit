@@ -132,12 +132,19 @@ Open http://localhost:8501 in your browser.
 
 ## Project Layout
 
-- `app.py` — Streamlit UI
+- `app/main.py` — Streamlit app orchestrator (upload, layout, tabs, triggers)
+- `app.py` — thin trampoline that calls `app/main.py`
+- `app/ui/` — tab UIs and helpers
+  - `azure_tab.py`, `reducto_tab.py`, `pymupdf_tab.py`
+  - `components.py` — small reusable UI utilities
+- `app/state/session.py` — typed `AppState` and `get_state()`
 - `app/services/reducto_service.py` — Reducto client creation and helpers
 - `app/services/azure_service.py` — Azure Document Intelligence helpers
+- `app/post_processing.py` — plugin loader + fallback for post-processor
 - `testing_files/reducto_files/test_reducto.py` — CLI smoke test
 - `requirements.txt` — pinned dependencies
 - `Dockerfile`, `.dockerignore` — containerization
+ - `.pre-commit-config.yaml`, `pyproject.toml` — lint/type/test tooling config
 
 ## License
 
