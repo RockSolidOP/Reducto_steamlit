@@ -1,0 +1,18 @@
+# General
+.git
+.gitignore
+.DS_Store
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Local env & IDE
+.env
+.venv
+.vscode
+
+# Large or generated content
+uploads
+*.ipynb_checkpoints
+
