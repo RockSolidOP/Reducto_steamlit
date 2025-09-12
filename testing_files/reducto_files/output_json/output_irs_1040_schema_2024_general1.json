@@ -1,0 +1,133 @@
+{
+  "citations": null,
+  "result": [
+    {
+      "form_name": "Form 1040",
+      "tax_year": 2024,
+      "filing_status": "Married filing jointly",
+      "presidential_election_campaign": {
+        "you": false,
+        "spouse": false
+      },
+      "taxpayer": {
+        "first_name": "Fname",
+        "middle_initial": null,
+        "last_name": "GenInfo",
+        "ssn": "123-65-4987",
+        "born_before_1960": false,
+        "blind": false,
+        "can_be_claimed_as_dependent": false
+      },
+      "spouse": {
+        "first_name": "Spouse",
+        "middle_initial": null,
+        "last_name": "GenInfo",
+        "ssn": "321-65-4874",
+        "born_before_1960": true,
+        "blind": true,
+        "can_be_claimed_as_dependent": false,
+        "spouse_itemizes_or_dual_status": false
+      },
+      "address": {
+        "street": "444 mainstreet",
+        "apt_no": "apt24",
+        "city": "Iron Mountain",
+        "state": "MI",
+        "zip": "42929",
+        "foreign": null
+      },
+      "digital_assets_question": null,
+      "dependents": [],
+      "income_and_adjustments": {
+        "line_1a_wages": null,
+        "line_1b_household_employee_wages": null,
+        "line_1c_tip_income_not_reported": null,
+        "line_1d_medicaid_waiver_payments": null,
+        "line_1e_adoption_benefits": null,
+        "line_1f_wages_from_form_8919": null,
+        "line_1g_other_earned_income": null,
+        "line_1h_nontaxable_combat_pay_election": null,
+        "line_1z_total_wages_and_other": null,
+        "line_2a_tax_exempt_interest": null,
+        "line_2b_taxable_interest": null,
+        "line_3a_qualified_dividends": null,
+        "line_3b_ordinary_dividends": null,
+        "line_4a_ira_distributions_total": null,
+        "line_4b_ira_distributions_taxable": null,
+        "line_5a_pensions_annuities_total": null,
+        "line_5b_pensions_annuities_taxable": null,
+        "line_6a_social_security_benefits_total": null,
+        "line_6b_social_security_benefits_taxable": null,
+        "line_7_capital_gain_or_loss": null,
+        "line_8_other_income_sched1_line10": -11578,
+        "line_9_total_income": -11578,
+        "line_10_adjustments_sched1_line26": 0,
+        "line_11_adjusted_gross_income": -11578,
+        "line_12_standard_or_itemized_deductions": 10000,
+        "line_13_qbi_deduction_from_8995_or_8995A": null,
+        "line_14_add_lines_12_and_13": 10000,
+        "line_15_taxable_income": 0
+      },
+      "tax_and_credits": {
+        "line_16_tax": 0,
+        "line_17_schedule2_line3": null,
+        "line_18_add_lines_16_and_17": 0,
+        "line_19_child_tax_credit_or_other_dependents_sched8812": null,
+        "line_20_amount_from_schedule3_line8": null,
+        "line_21_add_lines_19_and_20": null,
+        "line_22_subtract_line_21_from_line_18": 0,
+        "line_23_other_taxes_schedule2_line21": null,
+        "line_24_total_tax": 0
+      },
+      "payments_and_refundable_credits": {
+        "line_25a_fed_income_tax_withheld_w2": null,
+        "line_25b_fed_income_tax_withheld_1099": null,
+        "line_25c_fed_income_tax_withheld_other": null,
+        "line_25d_total_fed_income_tax_withheld": null,
+        "line_26_2024_estimated_payments_and_2023_applied": null,
+        "line_27_earned_income_credit_eic": null,
+        "line_28_additional_child_tax_credit_sched8812": null,
+        "line_29_american_opportunity_credit_form8863_line8": null,
+        "line_31_amount_from_schedule3_line15": null,
+        "line_32_total_other_payments_and_refundable_credits": null,
+        "line_33_total_payments": null
+      },
+      "refund": {
+        "line_34_overpaid": null,
+        "line_35a_amount_to_be_refunded": null,
+        "line_35a_form_8888_attached": false,
+        "direct_deposit": null,
+        "line_36_amount_applied_to_2025_estimated_tax": null
+      },
+      "amount_you_owe": {
+        "line_37_amount_you_owe": 0,
+        "line_38_estimated_tax_penalty": null
+      },
+      "signature_and_other_info": {
+        "your_occupation": "occupy",
+        "spouse_occupation": "wallstreet",
+        "phone": null,
+        "email": null,
+        "identity_protection_pin_primary": null,
+        "identity_protection_pin_spouse": null,
+        "third_party_designee": true,
+        "third_party_designee_name": null,
+        "third_party_phone": null,
+        "third_party_pin": null,
+        "paid_preparer_name": null,
+        "paid_preparer_ptin": null,
+        "paid_preparer_self_employed": false,
+        "paid_preparer_firm_name": "Trial System - To print your firm name here, call Thomson Reuters at 800-968-8900.",
+        "paid_preparer_firm_ein": null,
+        "paid_preparer_firm_address": null,
+        "paid_preparer_phone": null
+      }
+    }
+  ],
+  "usage": {
+    "num_fields": 99,
+    "num_pages": 2,
+    "credits": 3.0
+  },
+  "studio_link": "https://studio.reducto.ai/job/18c360d3-aaca-4801-a5db-91e8f4feb472"
+}

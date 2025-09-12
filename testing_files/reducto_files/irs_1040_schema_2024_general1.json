@@ -1,0 +1,274 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IRS Form 1040 (2024) Extraction Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "description": "Extract exactly what appears on the 2024 Form 1040. Do not infer or compute.",
+  "properties": {
+    "form_name": {
+      "type": "string",
+      "enum": ["Form 1040"],
+      "description": "Printed form name on the document header."
+    },
+    "tax_year": {
+      "type": "integer",
+      "enum": [2024],
+      "description": "Tax year printed on the form header."
+    },
+    "filing_status": {
+      "type": "string",
+      "enum": [
+        "Single",
+        "Married filing jointly",
+        "Married filing separately",
+        "Head of household",
+        "Qualifying surviving spouse"
+      ],
+      "description": "Box checked under Filing Status."
+    },
+    "presidential_election_campaign": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Boxes for the $3 Presidential Election Campaign fund.",
+      "properties": {
+        "you": { "type": "boolean", "description": "Box under 'You'." },
+        "spouse": { "type": "boolean", "description": "Box under 'Spouse'." }
+      }
+    },
+    "taxpayer": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Primary filer information as printed on page 1.",
+      "properties": {
+        "first_name": { "type": "string", "description": "Your first name." },
+        "middle_initial": { "type": "string", "maxLength": 1 },
+        "last_name": { "type": "string" },
+        "ssn": { "$ref": "#/$defs/ssn" },
+        "born_before_1960": { "type": "boolean", "description": "Age/Blindness checkbox: 'Were born before January 2, 1960'." },
+        "blind": { "type": "boolean", "description": "Age/Blindness checkbox: 'Are blind'." },
+        "can_be_claimed_as_dependent": { "type": "boolean", "description": "Standard deduction section: 'Someone can claim: You'." }
+      }
+    },
+    "spouse": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Spouse information when filing jointly or separately.",
+      "properties": {
+        "first_name": { "type": "string" },
+        "middle_initial": { "type": "string", "maxLength": 1 },
+        "last_name": { "type": "string" },
+        "ssn": { "$ref": "#/$defs/ssn" },
+        "born_before_1960": { "type": "boolean" },
+        "blind": { "type": "boolean" },
+        "can_be_claimed_as_dependent": { "type": "boolean", "description": "Standard deduction section: 'Spouse' box." },
+        "spouse_itemizes_or_dual_status": {
+          "type": "boolean",
+          "description": "Checkbox: 'Spouse itemizes on a separate return or you were a dual-status alien'."
+        }
+      }
+    },
+    "address": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Mailing address as printed.",
+      "properties": {
+        "street": { "type": "string", "description": "Number and street (and P.O. Box if applicable)." },
+        "apt_no": { "type": "string" },
+        "city": { "type": "string" },
+        "state": { "type": "string", "minLength": 2, "maxLength": 2, "description": "2-letter USPS code." },
+        "zip": { "$ref": "#/$defs/zip" },
+        "foreign": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "If foreign address is used.",
+          "properties": {
+            "country": { "type": "string" },
+            "province_state_county": { "type": "string" },
+            "postal_code": { "type": "string" }
+          }
+        }
+      }
+    },
+    "digital_assets_question": {
+      "type": "string",
+      "enum": ["Yes", "No"],
+      "description": "Yes/No to the digital assets question on page 1."
+    },
+    "dependents": {
+      "type": "array",
+      "description": "Dependents boxes on page 1 (up to four printed lines).",
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "ssn": { "$ref": "#/$defs/ssn" },
+          "relationship": { "type": "string" },
+          "eligible_child_tax_credit": { "type": "boolean" },
+          "eligible_other_dependents_credit": { "type": "boolean" }
+        }
+      }
+    },
+    "income_and_adjustments": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Lines 1–15 values exactly as printed. USD numbers; use minus sign if shown.",
+      "properties": {
+        "line_1a_wages": { "$ref": "#/$defs/money" },
+        "line_1b_household_employee_wages": { "$ref": "#/$defs/money" },
+        "line_1c_tip_income_not_reported": { "$ref": "#/$defs/money" },
+        "line_1d_medicaid_waiver_payments": { "$ref": "#/$defs/money" },
+        "line_1e_adoption_benefits": { "$ref": "#/$defs/money" },
+        "line_1f_wages_from_form_8919": { "$ref": "#/$defs/money" },
+        "line_1g_other_earned_income": { "$ref": "#/$defs/money" },
+        "line_1h_nontaxable_combat_pay_election": { "$ref": "#/$defs/money" },
+        "line_1z_total_wages_and_other": { "$ref": "#/$defs/money" },
+        "line_2a_tax_exempt_interest": { "$ref": "#/$defs/money" },
+        "line_2b_taxable_interest": { "$ref": "#/$defs/money" },
+        "line_3a_qualified_dividends": { "$ref": "#/$defs/money" },
+        "line_3b_ordinary_dividends": { "$ref": "#/$defs/money" },
+        "line_4a_ira_distributions_total": { "$ref": "#/$defs/money" },
+        "line_4b_ira_distributions_taxable": { "$ref": "#/$defs/money" },
+        "line_5a_pensions_annuities_total": { "$ref": "#/$defs/money" },
+        "line_5b_pensions_annuities_taxable": { "$ref": "#/$defs/money" },
+        "line_6a_social_security_benefits_total": { "$ref": "#/$defs/money" },
+        "line_6b_social_security_benefits_taxable": { "$ref": "#/$defs/money" },
+        "line_7_capital_gain_or_loss": { "$ref": "#/$defs/money" },
+        "line_8_other_income_sched1_line10": { "$ref": "#/$defs/money" },
+        "line_9_total_income": { "$ref": "#/$defs/money" },
+        "line_10_adjustments_sched1_line26": { "$ref": "#/$defs/money" },
+        "line_11_adjusted_gross_income": { "$ref": "#/$defs/money" },
+        "line_12_standard_or_itemized_deductions": { "$ref": "#/$defs/money" },
+        "line_13_qbi_deduction_from_8995_or_8995A": { "$ref": "#/$defs/money" },
+        "line_14_add_lines_12_and_13": { "$ref": "#/$defs/money" },
+        "line_15_taxable_income": { "$ref": "#/$defs/money" }
+      }
+    },
+    "tax_and_credits": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Page 2—Tax and Credits section (lines 16–24).",
+      "properties": {
+        "line_16_tax": { "$ref": "#/$defs/money" },
+        "line_17_schedule2_line3": { "$ref": "#/$defs/money" },
+        "line_18_add_lines_16_and_17": { "$ref": "#/$defs/money" },
+        "line_19_child_tax_credit_or_other_dependents_sched8812": { "$ref": "#/$defs/money" },
+        "line_20_amount_from_schedule3_line8": { "$ref": "#/$defs/money" },
+        "line_21_add_lines_19_and_20": { "$ref": "#/$defs/money" },
+        "line_22_subtract_line_21_from_line_18": { "$ref": "#/$defs/money" },
+        "line_23_other_taxes_schedule2_line21": { "$ref": "#/$defs/money" },
+        "line_24_total_tax": { "$ref": "#/$defs/money" }
+      }
+    },
+    "payments_and_refundable_credits": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Page 2—Payments (lines 25–33).",
+      "properties": {
+        "line_25a_fed_income_tax_withheld_w2": { "$ref": "#/$defs/money" },
+        "line_25b_fed_income_tax_withheld_1099": { "$ref": "#/$defs/money" },
+        "line_25c_fed_income_tax_withheld_other": { "$ref": "#/$defs/money" },
+        "line_25d_total_fed_income_tax_withheld": { "$ref": "#/$defs/money" },
+        "line_26_2024_estimated_payments_and_2023_applied": { "$ref": "#/$defs/money" },
+        "line_27_earned_income_credit_eic": { "$ref": "#/$defs/money" },
+        "line_28_additional_child_tax_credit_sched8812": { "$ref": "#/$defs/money" },
+        "line_29_american_opportunity_credit_form8863_line8": { "$ref": "#/$defs/money" },
+        "line_31_amount_from_schedule3_line15": { "$ref": "#/$defs/money" },
+        "line_32_total_other_payments_and_refundable_credits": { "$ref": "#/$defs/money" },
+        "line_33_total_payments": { "$ref": "#/$defs/money" }
+      }
+    },
+    "refund": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Page 2—Refund (lines 34–36).",
+      "properties": {
+        "line_34_overpaid": { "$ref": "#/$defs/money" },
+        "line_35a_amount_to_be_refunded": { "$ref": "#/$defs/money" },
+        "line_35a_form_8888_attached": { "type": "boolean", "description": "Box indicating Form 8888 is attached." },
+        "direct_deposit": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "routing_number": { "$ref": "#/$defs/routing_number" },
+            "account_number": { "$ref": "#/$defs/account_number" },
+            "account_type": { "type": "string", "enum": ["Checking", "Savings"] }
+          }
+        },
+        "line_36_amount_applied_to_2025_estimated_tax": { "$ref": "#/$defs/money" }
+      }
+    },
+    "amount_you_owe": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Page 2—Amount You Owe (lines 37–38).",
+      "properties": {
+        "line_37_amount_you_owe": { "$ref": "#/$defs/money" },
+        "line_38_estimated_tax_penalty": { "$ref": "#/$defs/money" }
+      }
+    },
+    "signature_and_other_info": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Page 2—Sign Here / Third Party Designee / Paid Preparer.",
+      "properties": {
+        "your_occupation": { "type": "string" },
+        "spouse_occupation": { "type": "string" },
+        "phone": { "$ref": "#/$defs/phone" },
+        "email": { "type": "string" },
+        "identity_protection_pin_primary": { "$ref": "#/$defs/ip_pin" },
+        "identity_protection_pin_spouse": { "$ref": "#/$defs/ip_pin" },
+        "third_party_designee": { "type": "boolean" },
+        "third_party_designee_name": { "type": "string" },
+        "third_party_phone": { "$ref": "#/$defs/phone" },
+        "third_party_pin": { "type": "string", "pattern": "^\\d{5}$" },
+        "paid_preparer_name": { "type": "string" },
+        "paid_preparer_ptin": { "type": "string" },
+        "paid_preparer_self_employed": { "type": "boolean" },
+        "paid_preparer_firm_name": { "type": "string" },
+        "paid_preparer_firm_ein": { "type": "string" },
+        "paid_preparer_firm_address": { "type": "string" },
+        "paid_preparer_phone": { "$ref": "#/$defs/phone" }
+      }
+    }
+  },
+  "required": ["form_name", "tax_year", "filing_status"],
+  "$defs": {
+    "money": {
+      "type": "number",
+      "description": "USD as printed on the form; use a leading minus sign if the form shows a negative amount."
+    },
+    "ssn": {
+      "type": "string",
+      "pattern": "^\\d{3}-\\d{2}-\\d{4}$",
+      "description": "Social Security Number as printed (NNN-NN-NNNN)."
+    },
+    "zip": {
+      "type": "string",
+      "pattern": "^\\d{5}(-\\d{4})?$",
+      "description": "ZIP or ZIP+4."
+    },
+    "ip_pin": {
+      "type": "string",
+      "pattern": "^\\d{6}$",
+      "description": "Identity Protection PIN (6 digits)."
+    },
+    "routing_number": {
+      "type": "string",
+      "pattern": "^\\d{9}$",
+      "description": "9-digit ABA routing number."
+    },
+    "account_number": {
+      "type": "string",
+      "minLength": 4,
+      "maxLength": 17,
+      "description": "Bank account number as printed."
+    },
+    "phone": {
+      "type": "string",
+      "description": "Phone number as printed; capture digits and formatting exactly."
+    }
+  }
+}

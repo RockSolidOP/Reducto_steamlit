@@ -85,6 +85,43 @@ def parse_document_range(client: Reducto, file_path: Path, start_page: int, end_
     return result.model_dump()
 
 
+def extract_with_schema(
+    client: Reducto,
+    file_path: Path,
+    *,
+    schema: dict,
+    start_page: int,
+    end_page: int,
+    system_prompt: str,
+) -> dict:
+    """Upload a document and run schema-based extraction via Reducto.
+
+    This passes the provided schema through untouched (no preprocessors) and
+    returns a plain JSON-compatible dict.
+    """
+    upload_url = client.upload(file=file_path)
+    adv = copy.deepcopy(ADVANCED_OPTIONS)
+    s = int(start_page)
+    e = int(end_page)
+    if e < s:
+        s, e = e, s
+    adv["page_range"] = {"start": s, "end": e}
+    result = client.extract.run(
+        document_url=upload_url,
+        schema=schema,
+        system_prompt=system_prompt,
+        options=OPTIONS,
+        advanced_options=adv,
+        experimental_options=EXPERIMENTAL_OPTIONS,
+    )
+    # Convert to plain dict if SDK returns a model-like object
+    if hasattr(result, "model_dump") and callable(getattr(result, "model_dump")):
+        return result.model_dump()
+    if hasattr(result, "dict") and callable(getattr(result, "dict")):
+        return result.dict()
+    return result  # assume already JSON-serializable
+
+
 def _present_block_pages(parsed: dict) -> List[int]:
     pages = set()
     for chunk in parsed.get("result", {}).get("chunks", []) or []:

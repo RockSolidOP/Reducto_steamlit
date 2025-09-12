@@ -17,9 +17,13 @@ from app.services.reducto_service import (
     _resolve_effective_page,
     extract_page_blocks,
     get_blocks_for_page,
+    extract_with_schema,
 )
 from app.state.session import AppState
 from app.ui.components import fmt_duration
+from testing_files.reducto_files.system_prompt import (
+    get_irs_1040_2024_extraction_prompt,
+)
 
 
 class Tab(Protocol):
@@ -245,3 +249,126 @@ class ReductoTab:
         elif run_red_page:
             state.use_reducto_range = False
             st.session_state["trigger_reducto"] = True
+
+        # --- Schema Extract (no preprocessors) ---
+        with st.expander("Schema Extract", expanded=False):
+            # Discover schemas from both the canonical test folder and a local editable folder
+            # test_schema_dir = Path("testing_files/reducto_files/input_json")
+            local_schema_dir = Path("reducto_schema")
+            # Ensure local schema directory exists
+            try:
+                local_schema_dir.mkdir(parents=True, exist_ok=True)
+            except Exception:
+                pass
+            schema_paths = sorted(local_schema_dir.glob("*.json")) if local_schema_dir.exists() else []
+            # Build human-friendly labels that include directory context
+            labels = [
+                (f"{p.parent.name}/{p.name}" if p.parent else p.name)
+                for p in schema_paths
+            ]
+            # Persist selection
+            default_idx = 0
+            if "selected_schema_path" in st.session_state and st.session_state["selected_schema_path"]:
+                try:
+                    default_idx = next(
+                        (i for i, p in enumerate(schema_paths) if str(p) == st.session_state["selected_schema_path"]),
+                        0,
+                    )
+                except Exception:
+                    default_idx = 0
+            sel = st.selectbox(
+                "Choose schema (from reducto_schema)",
+                options=list(range(len(labels))) if labels else [],
+                format_func=lambda i: labels[i] if labels else "",
+                index=min(default_idx, max(0, len(labels) - 1)) if labels else 0,
+            )
+            selected_schema_path: Path | None = schema_paths[sel] if labels else None
+            if selected_schema_path is not None:
+                st.session_state["selected_schema_path"] = str(selected_schema_path)
+
+            schema_obj: dict | None = None
+            if selected_schema_path is not None and selected_schema_path.exists():
+                try:
+                    with selected_schema_path.open("r", encoding="utf-8") as f:
+                        schema_obj = json.load(f)
+                except Exception as e:
+                    st.error(f"Failed to load schema: {e}")
+                    schema_obj = None
+            else:
+                if not labels:
+                    st.info("No schemas found. Add JSON files to reducto_schema.")
+
+            if schema_obj is not None:
+                with st.expander("Selected schema (preview)", expanded=False):
+                    st.json(schema_obj)
+            else:
+                if labels:
+                    st.info("Select a schema to enable extraction.")
+
+            c_run1, c_run2 = st.columns([1, 1])
+            with c_run1:
+                run_schema = st.button(
+                    "Run Schema Extraction",
+                    type="primary",
+                    disabled=(schema_obj is None),
+                    key="btn_run_schema_extract",
+                )
+            with c_run2:
+                st.caption(
+                    "Uses current Start/End page above for page_range; passes schema untouched."
+                )
+
+            if run_schema and schema_obj is not None:
+                try:
+                    client = create_client()
+                except Exception as e:
+                    st.error("Reducto is unavailable (configuration or network policy).")
+                    st.code(f"{type(e).__name__}: {e}")
+                    with st.expander("Full traceback"):
+                        st.exception(traceback.format_exc())
+                    st.stop()
+
+                # Resolve page range from the tab inputs
+                s_page = int(st.session_state.get("red_start_tab", 1))
+                e_page = int(st.session_state.get("red_end_tab", s_page))
+
+                # Resolve current PDF path from state
+                pdf_path = st.session_state.get("uploaded_pdf_path") or st.session_state.get("pdf_path")
+                if not pdf_path:
+                    st.error("No PDF selected or uploaded in the app.")
+                else:
+                    try:
+                        out = extract_with_schema(
+                            client,
+                            Path(str(pdf_path)),
+                            schema=schema_obj,
+                            start_page=s_page,
+                            end_page=e_page,
+                            system_prompt=get_irs_1040_2024_extraction_prompt(),
+                        )
+                        st.success("Extraction complete.")
+                        with st.expander("Schema result (JSON)", expanded=True):
+                            st.json(out)
+                        # Download
+                        st.download_button(
+                            "Download extracted.json",
+                            data=json.dumps(out, ensure_ascii=False, indent=2),
+                            file_name=f"extracted_{selected_schema_path.stem}.json",
+                            mime="application/json",
+                        )
+                        # Optional save to output_json mirroring test script
+                        try:
+                            out_dir = Path("testing_files/reducto_files/output_json")
+                            out_dir.mkdir(parents=True, exist_ok=True)
+                            out_path = out_dir / f"output_{selected_schema_path.stem}.json"
+                            with out_path.open("w", encoding="utf-8") as f:
+                                json.dump(out, f, ensure_ascii=False, indent=2)
+                            st.toast(f"Saved {out_path}")
+                        except Exception:
+                            # Non-fatal if saving fails
+                            pass
+                    except Exception as e:
+                        st.error("Schema extraction failed.")
+                        st.code(f"{type(e).__name__}: {e}")
+                        with st.expander("Full traceback"):
+                            st.exception(traceback.format_exc())
