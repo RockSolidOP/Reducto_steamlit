@@ -217,55 +217,88 @@ class ReductoTab:
 
     def render(self, state: AppState) -> None:  # noqa: D401 - documented in Protocol
         st.markdown("### Reducto")
-        r_col1, r_col2 = st.columns(2)
-        with r_col1:
-            red_start = st.number_input(
-                "Start page",
-                min_value=1,
-                max_value=max(1, int(st.session_state.get("page_count_ui", 1))),
-                value=int(st.session_state.get("page_number_ui", 1)),
-                step=1,
-                key="red_start_tab",
-            )
-        with r_col2:
-            red_end = st.number_input(
-                "End page",
-                min_value=1,
-                max_value=max(1, int(st.session_state.get("page_count_ui", 1))),
-                value=int(st.session_state.get("page_number_ui", 1)),
-                step=1,
-                key="red_end_tab",
-            )
-        c1, c2 = st.columns(2)
-        with c1:
-            run_red_page = st.button("Run Reducto (selected page)", type="primary", key="btn_red_page")
-        with c2:
-            run_red_range = st.button("Run Reducto (range)", type="primary", key="btn_red_range")
-        if run_red_range:
-            state.use_reducto_range = True
-            state.reducto_start_page = int(red_start)
-            state.reducto_end_page = int(red_end)
-            st.session_state["trigger_reducto"] = True
-        elif run_red_page:
-            state.use_reducto_range = False
-            st.session_state["trigger_reducto"] = True
+        tab_simple, tab_schema = st.tabs(["Simple Extract", "Schema Extract"])
 
-        # --- Schema Extract (no preprocessors) ---
-        with st.expander("Schema Extract", expanded=False):
+        # --- Simple Extract tab ---
+        with tab_simple:
+            r_col1, r_col2 = st.columns(2)
+            with r_col1:
+                red_start = st.number_input(
+                    "Start page",
+                    min_value=1,
+                    max_value=max(1, int(st.session_state.get("page_count_ui", 1))),
+                    value=int(st.session_state.get("page_number_ui", 1)),
+                    step=1,
+                    key="red_start_tab",
+                )
+            with r_col2:
+                red_end = st.number_input(
+                    "End page",
+                    min_value=1,
+                    max_value=max(1, int(st.session_state.get("page_count_ui", 1))),
+                    value=int(st.session_state.get("page_number_ui", 1)),
+                    step=1,
+                    key="red_end_tab",
+                )
+            c1, c2 = st.columns(2)
+            with c1:
+                run_red_page = st.button("Run Reducto (selected page)", type="primary", key="btn_red_page")
+            with c2:
+                run_red_range = st.button("Run Reducto (range)", type="primary", key="btn_red_range")
+            if run_red_range:
+                state.use_reducto_range = True
+                state.reducto_start_page = int(red_start)
+                state.reducto_end_page = int(red_end)
+                st.session_state["trigger_reducto"] = True
+            elif run_red_page:
+                state.use_reducto_range = False
+                st.session_state["trigger_reducto"] = True
+
+        # --- Schema Extract tab (no preprocessors) ---
+        with tab_schema:
             # Discover schemas from both the canonical test folder and a local editable folder
-            # test_schema_dir = Path("testing_files/reducto_files/input_json")
             local_schema_dir = Path("reducto_schema")
-            # Ensure local schema directory exists
             try:
                 local_schema_dir.mkdir(parents=True, exist_ok=True)
             except Exception:
                 pass
+
+            # Upload new schema
+            st.markdown("#### Manage Schemas")
+            up_col1, up_col2 = st.columns([2, 1])
+            with up_col1:
+                uploaded_schema = st.file_uploader("Upload JSON schema", type=["json"], key="schema_uploader")
+            with up_col2:
+                overwrite_upload = st.checkbox("Overwrite if exists", value=False, key="schema_upload_overwrite")
+            if uploaded_schema is not None:
+                try:
+                    raw = uploaded_schema.read().decode("utf-8")
+                    obj = json.loads(raw)  # validate JSON
+                    target_name = Path(uploaded_schema.name).name
+                    if not target_name.lower().endswith(".json"):
+                        target_name += ".json"
+                    target_path = local_schema_dir / target_name
+                    if target_path.exists() and not overwrite_upload:
+                        base = target_path.stem
+                        suffix = target_path.suffix
+                        i = 1
+                        while True:
+                            alt = local_schema_dir / f"{base}_{i}{suffix}"
+                            if not alt.exists():
+                                target_path = alt
+                                break
+                            i += 1
+                    with target_path.open("w", encoding="utf-8") as f:
+                        json.dump(obj, f, ensure_ascii=False, indent=2)
+                    st.success(f"Uploaded schema saved to {target_path}")
+                    st.session_state["selected_schema_path"] = str(target_path)
+                except Exception as e:
+                    st.error(f"Upload failed: {e}")
+
+            # Refresh list after possible upload
             schema_paths = sorted(local_schema_dir.glob("*.json")) if local_schema_dir.exists() else []
-            # Build human-friendly labels that include directory context
-            labels = [
-                (f"{p.parent.name}/{p.name}" if p.parent else p.name)
-                for p in schema_paths
-            ]
+            labels = [f"{p.parent.name}/{p.name}" for p in schema_paths]
+
             # Persist selection
             default_idx = 0
             if "selected_schema_path" in st.session_state and st.session_state["selected_schema_path"]:
@@ -281,44 +314,131 @@ class ReductoTab:
                 options=list(range(len(labels))) if labels else [],
                 format_func=lambda i: labels[i] if labels else "",
                 index=min(default_idx, max(0, len(labels) - 1)) if labels else 0,
+                key="schema_select_index",
             )
             selected_schema_path: Path | None = schema_paths[sel] if labels else None
             if selected_schema_path is not None:
                 st.session_state["selected_schema_path"] = str(selected_schema_path)
 
-            schema_obj: dict | None = None
-            if selected_schema_path is not None and selected_schema_path.exists():
+            # Viewer + editor for selected schema (with Edit toggle on top-right)
+            schema_text_key = "schema_editor_text"
+            edit_mode_key = "schema_edit_mode"
+            st.session_state.setdefault(edit_mode_key, False)
+
+            def _load_editor_buffer_from_file(p: Path) -> None:
                 try:
-                    with selected_schema_path.open("r", encoding="utf-8") as f:
-                        schema_obj = json.load(f)
+                    with p.open("r", encoding="utf-8") as f:
+                        st.session_state[schema_text_key] = f.read()
+                except Exception:
+                    st.session_state[schema_text_key] = ""
+
+            # Load current file into editor buffer when switching files
+            if selected_schema_path and selected_schema_path.exists():
+                try:
+                    prev_sel = st.session_state.get("selected_schema_path_prev")
+                    if (schema_text_key not in st.session_state) or (prev_sel != str(selected_schema_path)):
+                        _load_editor_buffer_from_file(selected_schema_path)
+                        st.session_state["selected_schema_path_prev"] = str(selected_schema_path)
                 except Exception as e:
-                    st.error(f"Failed to load schema: {e}")
-                    schema_obj = None
+                    st.error(f"Failed to read schema: {e}")
+                # Ensure buffer is populated even if key existed but was empty
+                if not st.session_state.get(schema_text_key):
+                    _load_editor_buffer_from_file(selected_schema_path)
             else:
                 if not labels:
-                    st.info("No schemas found. Add JSON files to reducto_schema.")
+                    st.info("No schemas found. Upload a JSON schema to begin.")
 
-            if schema_obj is not None:
-                with st.expander("Selected schema (preview)", expanded=False):
-                    st.json(schema_obj)
-            else:
-                if labels:
-                    st.info("Select a schema to enable extraction.")
+            # Header row with Edit or Save/Cancel actions on the right
+            if labels and selected_schema_path is not None:
+                hdr_l, hdr_r = st.columns([4, 2])
+                with hdr_l:
+                    st.markdown("#### Selected Schema")
+                with hdr_r:
+                    if not st.session_state[edit_mode_key]:
+                        if st.button("Edit", key="schema_btn_edit"):
+                            # Enter edit mode and ensure editor buffer is populated
+                            if selected_schema_path and selected_schema_path.exists():
+                                _load_editor_buffer_from_file(selected_schema_path)
+                            st.session_state[edit_mode_key] = True
+                    else:
+                        r1, r2, r3 = st.columns([1, 1, 1])
+                        with r1:
+                            save_btn = st.button("Save", key="schema_btn_save")
+                        with r2:
+                            save_as_btn = st.button("Save As", key="schema_btn_save_as")
+                        with r3:
+                            cancel_btn = st.button("Cancel", key="schema_btn_cancel")
 
-            c_run1, c_run2 = st.columns([1, 1])
-            with c_run1:
-                run_schema = st.button(
-                    "Run Schema Extraction",
-                    type="primary",
-                    disabled=(schema_obj is None),
-                    key="btn_run_schema_extract",
-                )
-            with c_run2:
-                st.caption(
-                    "Uses current Start/End page above for page_range; passes schema untouched."
-                )
+                        if cancel_btn:
+                            # Reset editor buffer to file content
+                            try:
+                                with selected_schema_path.open("r", encoding="utf-8") as f:
+                                    st.session_state[schema_text_key] = f.read()
+                            except Exception:
+                                pass
+                            st.session_state[edit_mode_key] = False
 
-            if run_schema and schema_obj is not None:
+                # Editor/viewer area
+                if st.session_state[edit_mode_key]:
+                    st.text_area(
+                        "",
+                        key=schema_text_key,
+                        height=300,
+                        label_visibility="collapsed",
+                    )
+                    # Save-As filename field below editor
+                    save_as_name = st.text_input(
+                        "Filename (.json)",
+                        value=selected_schema_path.name,
+                        key="schema_save_as_name",
+                    )
+
+                    def _write_schema(target: Path, content: str) -> bool:
+                        try:
+                            obj = json.loads(content)
+                        except Exception as e:
+                            st.error(f"Invalid JSON: {e}")
+                            return False
+                        try:
+                            with target.open("w", encoding="utf-8") as f:
+                                json.dump(obj, f, ensure_ascii=False, indent=2)
+                            st.success(f"Saved {target}")
+                            return True
+                        except Exception as e:
+                            st.error(f"Save failed: {e}")
+                            return False
+
+                    if 'save_btn' in locals() and save_btn:
+                        if _write_schema(selected_schema_path, st.session_state.get(schema_text_key, "")):
+                            st.session_state[edit_mode_key] = False
+
+                    if 'save_as_btn' in locals() and save_as_btn:
+                        name = (save_as_name or selected_schema_path.name).strip()
+                        if not name.lower().endswith(".json"):
+                            name += ".json"
+                        target = local_schema_dir / name
+                        if _write_schema(target, st.session_state.get(schema_text_key, "")):
+                            st.session_state["selected_schema_path"] = str(target)
+                            st.session_state[edit_mode_key] = False
+                else:
+                    # Viewer mode
+                    try:
+                        file_obj = None
+                        with selected_schema_path.open("r", encoding="utf-8") as f:
+                            file_obj = json.load(f)
+                        st.json(file_obj)
+                    except Exception as e:
+                        st.error(f"Failed to load schema: {e}")
+
+            st.divider()
+            # Run extraction using the editor content (even if not saved)
+            run_col1, run_col2 = st.columns([1, 2])
+            with run_col1:
+                run_schema = st.button("Run Schema Extraction", type="primary", key="btn_run_schema_extract")
+            with run_col2:
+                st.caption("Uses Start/End from Simple Extract or left options.")
+
+            if run_schema:
                 try:
                     client = create_client()
                 except Exception as e:
@@ -328,9 +448,17 @@ class ReductoTab:
                         st.exception(traceback.format_exc())
                     st.stop()
 
-                # Resolve page range from the tab inputs
-                s_page = int(st.session_state.get("red_start_tab", 1))
-                e_page = int(st.session_state.get("red_end_tab", s_page))
+                # Resolve page range from either tab inputs or left options
+                s_page = int(
+                    st.session_state.get("red_start_tab")
+                    or st.session_state.get("red_start")
+                    or st.session_state.get("page_number_ui", 1)
+                )
+                e_page = int(
+                    st.session_state.get("red_end_tab")
+                    or st.session_state.get("red_end")
+                    or s_page
+                )
 
                 # Resolve current PDF path from state
                 pdf_path = st.session_state.get("uploaded_pdf_path") or st.session_state.get("pdf_path")
@@ -338,6 +466,15 @@ class ReductoTab:
                     st.error("No PDF selected or uploaded in the app.")
                 else:
                     try:
+                        # Use editor content if in edit mode; else load from selected file
+                        schema_text = None
+                        if st.session_state.get(edit_mode_key):
+                            schema_text = st.session_state.get(schema_text_key)
+                        if not schema_text and selected_schema_path and selected_schema_path.exists():
+                            schema_text = selected_schema_path.read_text(encoding="utf-8")
+                        schema_obj = json.loads(schema_text) if schema_text else None
+                        if not isinstance(schema_obj, dict):
+                            raise ValueError("Schema must be a JSON object")
                         out = extract_with_schema(
                             client,
                             Path(str(pdf_path)),
@@ -349,23 +486,25 @@ class ReductoTab:
                         st.success("Extraction complete.")
                         with st.expander("Schema result (JSON)", expanded=True):
                             st.json(out)
-                        # Download
                         st.download_button(
                             "Download extracted.json",
                             data=json.dumps(out, ensure_ascii=False, indent=2),
-                            file_name=f"extracted_{selected_schema_path.stem}.json",
+                            file_name=(
+                                f"extracted_{selected_schema_path.stem}.json"
+                                if selected_schema_path is not None else "extracted.json"
+                            ),
                             mime="application/json",
                         )
-                        # Optional save to output_json mirroring test script
                         try:
                             out_dir = Path("testing_files/reducto_files/output_json")
                             out_dir.mkdir(parents=True, exist_ok=True)
-                            out_path = out_dir / f"output_{selected_schema_path.stem}.json"
+                            out_path = out_dir / (
+                                f"output_{selected_schema_path.stem}.json" if selected_schema_path is not None else "output.json"
+                            )
                             with out_path.open("w", encoding="utf-8") as f:
                                 json.dump(out, f, ensure_ascii=False, indent=2)
                             st.toast(f"Saved {out_path}")
                         except Exception:
-                            # Non-fatal if saving fails
                             pass
                     except Exception as e:
                         st.error("Schema extraction failed.")

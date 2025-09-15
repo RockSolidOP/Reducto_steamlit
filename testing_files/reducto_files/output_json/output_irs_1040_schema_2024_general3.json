@@ -33,8 +33,7 @@
         "apt_no": "apt24",
         "city": "Iron Mountain",
         "state": "MI",
-        "zip": "42929",
-        "foreign": null
+        "zip": "42929"
       },
       "digital_assets_question": null,
       "dependents": [],
@@ -76,9 +75,9 @@
     }
   ],
   "usage": {
-    "num_fields": 55,
+    "num_fields": 54,
     "num_pages": 1,
     "credits": 2.0
   },
-  "studio_link": "https://studio.reducto.ai/job/a2aa7741-803b-46ff-a6b6-b9ce055dbb94"
+  "studio_link": "https://studio.reducto.ai/job/f25741fe-fbcf-47f6-a025-68be3086ea40"
 }
