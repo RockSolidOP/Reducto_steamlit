@@ -18,4 +18,4 @@ project_metadata/
 .mypy_cache/
 .ruff_cache/
 .coverage
-testing_files/reducto_files/output_json/output_irs_1040_schema_2024_general3.json
+testing_files/reducto_files/output_json/

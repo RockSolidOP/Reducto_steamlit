@@ -430,6 +430,54 @@ class ReductoTab:
                     except Exception as e:
                         st.error(f"Failed to load schema: {e}")
 
+            # Non-blocking validation preview of current schema content
+            st.markdown("#### Schema Validation Preview")
+            try:
+                current_schema_text: str | None = None
+                if st.session_state.get(edit_mode_key):
+                    current_schema_text = st.session_state.get(schema_text_key)
+                elif selected_schema_path and selected_schema_path.exists():
+                    current_schema_text = selected_schema_path.read_text(encoding="utf-8")
+                if current_schema_text:
+                    parsed_any = json.loads(current_schema_text)
+                    looks_like_json_schema = (
+                        isinstance(parsed_any, dict)
+                        and parsed_any.get("type") == "object"
+                        and isinstance(parsed_any.get("properties"), dict)
+                    )
+                    if looks_like_json_schema:
+                        st.success("Looks like a valid JSON Schema (type: object with properties).")
+                    else:
+                        st.warning(
+                            "Selected JSON may not meet the API's JSON Schema requirements. "
+                            "We will still send it as-is; the API may return 422/400."
+                        )
+                        with st.expander("What the API expects"):
+                            st.code(
+                                json.dumps(
+                                    {
+                                        "title": "Example",
+                                        "type": "object",
+                                        "properties": {
+                                            "fieldA": {"type": "string"},
+                                            "fieldB": {"type": "number"},
+                                            "flag": {"type": "boolean"}
+                                        },
+                                        "additionalProperties": False
+                                    },
+                                    indent=2,
+                                ),
+                                language="json",
+                            )
+                            st.caption(
+                                "Root must be an object with explicit property types: "
+                                "string, number, integer, boolean, object, or array."
+                            )
+                    st.caption(f"Parsed JSON type: {type(parsed_any).__name__}")
+            except Exception:
+                # Silent preview errors to avoid blocking flow
+                pass
+
             st.divider()
             # Run extraction using the editor content (even if not saved)
             run_col1, run_col2 = st.columns([1, 2])
@@ -472,13 +520,16 @@ class ReductoTab:
                             schema_text = st.session_state.get(schema_text_key)
                         if not schema_text and selected_schema_path and selected_schema_path.exists():
                             schema_text = selected_schema_path.read_text(encoding="utf-8")
-                        schema_obj = json.loads(schema_text) if schema_text else None
-                        if not isinstance(schema_obj, dict):
-                            raise ValueError("Schema must be a JSON object")
+                        schema_obj_any = json.loads(schema_text) if schema_text else None
+                        if not isinstance(schema_obj_any, dict):
+                            st.warning(
+                                "Selected content is not a JSON object. The API expects a JSON Schema object; "
+                                "sending as-is will likely fail."
+                            )
                         out = extract_with_schema(
                             client,
                             Path(str(pdf_path)),
-                            schema=schema_obj,
+                            schema=schema_obj_any,
                             start_page=s_page,
                             end_page=e_page,
                             system_prompt=get_irs_1040_2024_extraction_prompt(),
