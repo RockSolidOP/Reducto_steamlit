@@ -1,6 +1,6 @@
 # Environment and local config
 .env
-
+.TRvenv/
 # Python
 __pycache__/
 *.py[cod]
