@@ -33,7 +33,8 @@
         "apt_no": "apt24",
         "city": "Iron Mountain",
         "state": "MI",
-        "zip": "42929"
+        "zip": "42929",
+        "foreign": null
       },
       "digital_assets_question": null,
       "dependents": [],
@@ -67,17 +68,18 @@
         "line_14_add_lines_12_and_13": 10000,
         "line_15_taxable_income": 0
       },
-      "tax_and_credits": {},
-      "payments_and_refundable_credits": {},
-      "refund": {},
-      "amount_you_owe": {},
-      "signature_and_other_info": {}
+      "tax_and_credits": null,
+      "payments_and_refundable_credits": null,
+      "refund": null,
+      "amount_you_owe": null,
+      "signature_and_other_info": null
     }
   ],
   "usage": {
-    "num_fields": 54,
+    "num_fields": 60,
     "num_pages": 1,
     "credits": 2.0
   },
-  "studio_link": "https://studio.reducto.ai/job/f25741fe-fbcf-47f6-a025-68be3086ea40"
+  "studio_link": "https://studio.reducto.ai/job/e63c27eb-499a-4fcd-a3df-20fd8ea89396",
+  "job_id": "e63c27eb-499a-4fcd-a3df-20fd8ea89396"
 }

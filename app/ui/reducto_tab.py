@@ -526,14 +526,25 @@ class ReductoTab:
                                 "Selected content is not a JSON object. The API expects a JSON Schema object; "
                                 "sending as-is will likely fail."
                             )
-                        out = extract_with_schema(
-                            client,
-                            Path(str(pdf_path)),
-                            schema=schema_obj_any,
-                            start_page=s_page,
-                            end_page=e_page,
-                            system_prompt=get_irs_1040_2024_extraction_prompt(),
-                        )
+                        schema_api_secs = 0.0
+                        with st.status("Extracting with Reducto (schema)…", expanded=False) as status:
+                            try:
+                                t0 = perf_counter()
+                                out = extract_with_schema(
+                                    client,
+                                    Path(str(pdf_path)),
+                                    schema=schema_obj_any,
+                                    start_page=s_page,
+                                    end_page=e_page,
+                                    system_prompt=get_irs_1040_2024_extraction_prompt(),
+                                )
+                                schema_api_secs = perf_counter() - t0
+                                status.update(label="Extraction complete", state="complete")
+                            except Exception:
+                                status.update(label="Schema extraction failed", state="error")
+                                raise
+
+                        st.caption(f"⏱️ Reducto (schema) timings — API: {fmt_duration(schema_api_secs)}")
                         st.success("Extraction complete.")
                         with st.expander("Schema result (JSON)", expanded=True):
                             st.json(out)
@@ -546,17 +557,7 @@ class ReductoTab:
                             ),
                             mime="application/json",
                         )
-                        try:
-                            out_dir = Path("testing_files/reducto_files/output_json")
-                            out_dir.mkdir(parents=True, exist_ok=True)
-                            out_path = out_dir / (
-                                f"output_{selected_schema_path.stem}.json" if selected_schema_path is not None else "output.json"
-                            )
-                            with out_path.open("w", encoding="utf-8") as f:
-                                json.dump(out, f, ensure_ascii=False, indent=2)
-                            st.toast(f"Saved {out_path}")
-                        except Exception:
-                            pass
+                        # Intentionally do not write results to disk; rely on on-screen view and manual download.
                     except Exception as e:
                         st.error("Schema extraction failed.")
                         st.code(f"{type(e).__name__}: {e}")

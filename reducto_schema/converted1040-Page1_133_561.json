@@ -1,0 +1,299 @@
+{
+  "title": "1040-Page1",
+  "type": "object",
+  "properties": {
+    "DEP.CROTHDEP": {
+      "type": "string",
+      "description": "If a dependent is not child and qualify for the Credit as other dependents, check that box. See Schedule 8812 (Form 1040) and its instructions for information on figuring and claiming any child tax credit and credit for other dependents that you may qualify to claim"
+    },
+    "FED.AGIP1": {
+      "type": "number",
+      "description": "Subtract line 10 from line 9. This is your adjusted gross income. If this amount is less than zero, enter the amount in parentheses."
+    },
+    "FED.APTNO": {
+      "type": "string",
+      "description": "If you live in an apartment, be sure to include your apartment number in your address."
+    },
+    "FED.BEGINNING": {
+      "type": "string",
+      "description": "Fiscal year filers. If you are a fiscal year filer using a tax year other than January 1 through December 31, 2023, enter the beginning and ending months of your fiscal year in the entry space provided at the top of page 1 of Form 1040 or 1040-SR."
+    },
+    "FED.CAPITAL": {
+      "type": "number",
+      "description": "Enter on line 7 any capital gain or (loss) from Schedule D. If you don't have to file Schedule D, check the box on line 7 and enter any capital gain distributions on line 7. For details about other amounts that must be included on line 7, see the instructions for Schedule D."
+    },
+    "FED.CITY1": {
+      "type": "string",
+      "description": "Enter your city, town or post office. If you have a foreign address, enter the city here and complete the spaces below it for the foreign province/state/county and foreign postal code."
+    },
+    "FED.COUNTRY1": {
+      "type": "string",
+      "description": "If you have a foreign address, enter the country name. Don't abbreviate the country name. Follow the country's practice for entering the postal code and the name of the province, county, or state."
+    },
+    "FED.DEPOVER4": {
+      "type": "string",
+      "description": "The dependents section of Form 1040 has space for four dependents. If you have more than four dependents, check the box and include a statement showing the required information for each additional dependent. The required information is the same as requested in columns (1) through (4) of the Dependents section."
+    },
+    "FED.DIVIDEND": {
+      "type": "number",
+      "description": "Each payer should send you a Form 1099-DIV. Enter your total ordinary dividends on line 3b. This amount should be shown in box 1a of Form(s) 1099-DIV. You must fill in and attach Schedule B if the total is over $1,500 or you received, as a nominee, ordinary dividends that actually belong to someone else."
+    },
+    "FED.DEPFIRST": {
+      "type": "string",
+      "description": "For each dependent, you must provide their name, social security number, relationship to you, and check the appropriate box under column 4 if they qualify for child tax credit or credit for other dependents. The dependents you claim are those you list by name and SSN in the Dependents section on Form 1040 or 1040-SR."
+    },
+    "FED.DEPSSN": {
+      "type": "string",
+      "description": "Make sure you entered the correct name and social security number (SSN) for each dependent you claim in the Dependents section.Check that each dependent's name and SSN agrees with the dependent’s social security card."
+    },
+    "FED.EICCP": {
+      "type": "number",
+      "description": "If you elect to include your nontaxable combat pay in your earned income when figuring the EIC, enter the amount on line 1i. See the instructions for line 27. Combat pay, nontaxable. If you were a member of the U.S. Armed Forces who served in a combat zone, certain pay is excluded from your income. See Combat Zone Exclusion in Pub. 3. You can elect to include this pay in your earned income when figuring the EIC. The amount of your nontaxable combat pay should be shown in box 12 of Form(s) W-2 with code Q."
+    },
+    "FED.ENDING": {
+      "type": "string",
+      "description": "For the year Jan. 1-Dec. 31, 2023, or other tax year beginning [date], ending [date]. If you are a fiscal year filer using a tax year other than January 1 through December 31, 2023, enter the ending month and year of your fiscal year."
+    },
+    "FED.ENDINGS": {
+      "type": "string",
+      "description": "For the year Jan. 1-Dec. 31, 2023, or other tax year beginning [date], ending [date]. If you are a fiscal year filer using a tax year other than January 1 through December 31, 2023, enter the ending month and year of your fiscal year."
+    },
+    "FED.HOH1": {
+      "type": "string",
+      "description": "You can check the “Head of household” box in the Filing Status section on page 1 of Form 1040 or 1040-SR if you are unmarried and provide a home for certain other persons.1-You are married but lived apart from your spouse for the last 6 months 2-You are married but lived apart from your spouse for the last 6 months 3-You were legally separated according to your state law under a decree of divorce or separate maintenance at the end of 2023."
+    },
+    "FED.MFJ1": {
+      "type": "string",
+      "description": "You can check the “Married filing jointly” box in the Filing Status section on page 1 of Form 1040 or 1040-SR if any of the following apply:1- You were married at the end of 2023. 2-Your spouse died in 2023 and you didn't remarry in 2023-"
+    },
+    "FED.MFS1": {
+      "type": "string",
+      "description": "Check the “Married filing separately” box in the Filing Status section on page 1 of Form 1040 or 1040-SR if you are married, at the end of 2023, and file a separate return. Enter your spouse’s name in the entry space below the filing status checkboxes."
+    },
+    "FED.QD": {
+      "type": "number",
+      "description": "Enter your total qualified dividends on line 3a. Qualified dividends are also included in the ordinary dividend total required to be shown on line 3b. Qualified dividends are eligible for a lower tax rate than other ordinary income. Generally, these dividends are shown in box 1b of Form(s) 1099-DIV. See Pub. 550 for the definition of qualified dividends if you received dividends not reported on Form 1099-DIV."
+    },
+    "FED.RELATION": {
+      "type": "string",
+      "description": "Dependents must meet the requirements of either a qualifying child or a qualifying relative"
+    },
+    "FED.SELECTYES": {
+      "type": "string",
+      "description": "Check here if you, or your spouse if filing jointly, want $3  to go to this fund. Checking a box below will not change your tax or refund"
+    },
+    "FED.SFIRST": {
+      "type": "string",
+      "description": "If you are married filing a joint return, enter your spouse's name in the space provided below the filing status checkboxes. If you are filing a joint return with your spouse who died in 2023, see Death of a Taxpayer, earlier."
+    },
+    "FED.SINGLE1": {
+      "type": "string",
+      "description": "You can check the “Single” box in the Filing Status section on page 1 of Form 1040 or 1040-SR if any of the following was true on December 31, 2023.1-You were never married 2-You were legally separated 3-You were widowed before January 1, 2023, and didn't remarry before the end of 2023."
+    },
+    "FED.SLAST": {
+      "type": "string",
+      "description": "If you filed a joint return for 2023 and you are filing a joint return for 2024 with the same spouse, be sure to enter your names and SSNs in the same order as on your 2023 return."
+    },
+    "FED.SP65": {
+      "type": "string",
+      "description": "If you were born before January 2, 1960, check this box. If you are filing a joint return and your spouse was born before January 2, 1960, check the appropriate box in the Age/Blindness section."
+    },
+    "FED.SPBLD": {
+      "type": "string",
+      "description": "If you were born before January 2, 1960, check this box. If you are filing a joint return and your spouse was born before January 2, 1960, check the appropriate box in the Age/Blindness section."
+    },
+    "FED.SPOUSEITEM": {
+      "type": "string",
+      "description": "If you were a dual-status alien, check the “Spouse itemizes on a separate return or you were a dual-status alien” box."
+    },
+    "FED.SSSN": {
+      "type": "string",
+      "description": "If you are filing a joint return, enter your spouse's social security number (SSN). Be sure to enter your spouse's SSN in the proper place on your tax return. Check that both the name and SSN match your spouse's social security card."
+    },
+    "FED.STATE1": {
+      "type": "string",
+      "description": "Enter your state of residence. If you have a foreign address, complete all spaces as appropriate. Don't abbreviate the country name."
+    },
+    "FED.STREET1": {
+      "type": "string",
+      "description": "Enter your home address. If you have a P.O. box, enter your box number only if your post office doesn't deliver mail to your home. If you live in an apartment, be sure to include your apartment number in your address."
+    },
+    "FED.STREET2": {
+      "type": "string",
+      "description": "If you have a P.O. box, be sure to include your apartment number and complete street address. Only the U.S. Postal Service can deliver to P.O. boxes. You can't use a private delivery service to make tax payments required to be sent to a P.O. box. If you live in an apartment, be sure to include your apartment number in your address."
+    },
+    "FED.TAXINC": {
+      "type": "number",
+      "description": "Subtract line 14 from line 11. This is your taxable income. If zero or less, enter -0-."
+    },
+    "FED.TAXINT": {
+      "type": "number",
+      "description": "Each payer should send you a Form 1099-INT or Form 1099-OID. Enter your total taxable interest income on line 2b. But you must fill in and attach Schedule B if the total is over $1,500 or any of the other conditions listed at the beginning of the Schedule B instructions applies to you."
+    },
+    "FED.TAXIRA": {
+      "type": "number",
+      "description": "See the instructions for lines 4a and 4b to determine the taxable amount. The taxable amount should be shown in box 2a of Form 1099-R. Enter it on line 4b. However, if you rolled over part or all of the distribution from one IRA to another, see the exceptions in the instructions."
+    },
+    "FED.TAXPENS": {
+      "type": "number",
+      "description": "If you received a pension or annuity payment that is partially taxable and partially nontaxable, enter the taxable amount on line 5b. If your Form 1099-R doesn't show the taxable amount, you must use the General Rule explained in Pub. 939 to figure it. If your annuity starting date was after July 1, 1986, see if you can use the Simplified Method explained earlier."
+    },
+    "FED.TAXSS": {
+      "type": "number",
+      "description": "Enter the taxable amount of social security benefits calculated using the Social Security Benefits Worksheet in the instructions. Not all social security benefits are taxable. See the instructions for lines 6a and 6b to figure if any of your benefits are taxable."
+    },
+    "FED.TAXXINT": {
+      "type": "number",
+      "description": "If you received any tax-exempt interest (including any tax-exempt original issue discount (OID)), such as from municipal bonds, each payer should send you a Form 1099-INT or a Form 1099-OID. In general, your tax-exempt stated interest should be shown in box 8 of Form 1099-INT or, for a tax-exempt OID bond, in box 2 of Form 1099-OID, and your tax-exempt OID should be shown in box 11 of Form 1099-OID."
+    },
+    "FED.TELECTYES": {
+      "type": "string",
+      "description": "Check here if you, or your spouse if filing jointly, want $3  to go to this fund. Checking a box below will not change your tax or refund ."
+    },
+    "FED.TFIRST": {
+      "type": "string",
+      "description": "Enter your name in the same order as shown on your social security card. This will help avoid delays in processing your return and issuing refunds. It will also help safeguard your future social security benefits."
+    },
+    "FED.TLAST": {
+      "type": "string",
+      "description": "Enter your last name (surname) as shown on your social security card. If you changed your last name, be sure to contact the Social Security Administration before filing your tax return."
+    },
+    "FED.TOTIRA": {
+      "type": "number",
+      "description": "You should receive a Form 1099-R showing the total amount of any distribution from your IRA before income tax or other deductions were withheld. This amount should be shown in box 1 of Form 1099-R. Unless otherwise noted in the line 4a and 4b instructions, an IRA includes a traditional IRA, Roth IRA (including a Roth SIMPLE IRA), and a SIMPLE IRA (a SIMPLE IRA may either be a traditional SIMPLE IRA or a Roth SIMPLE IRA)."
+    },
+    "FED.TOTPENS": {
+      "type": "number",
+      "description": "You should receive a Form 1099-R showing the total amount of your pension and annuity payments before income tax or other deductions were withheld. This amount should be shown in box 1 of Form 1099-R. Pension and annuity payments include distributions from 401(k), 403(b), and governmental 457(b) plans. Rollovers and lump-sum distributions are explained later."
+    },
+    "FED.TP65": {
+      "type": "string",
+      "description": "If you were born before January 2, 1960, check this box. If you are filing a joint return and your spouse was born before January 2, 1960, check the appropriate box in the Age/Blindness section."
+    },
+    "FED.TPBLD": {
+      "type": "string",
+      "description": "If you were born before January 2, 1960, check this box. If you are filing a joint return and your spouse was born before January 2, 1960, check the appropriate box in the Age/Blindness section."
+    },
+    "FED.TSSN": {
+      "type": "string",
+      "description": "Enter your social security number (SSN). Be sure to enter your SSN in the space provided on page 1 of Form 1040 or 1040-SR. If you are married filing a joint or separate return, also enter your spouse's SSN. Be sure to enter your SSN in the space next to your name. Check that your name and SSN agree with your social security card."
+    },
+    "FED.TTLADJ": {
+      "type": "number",
+      "description": "Enter the amount from Schedule 1, line 26, which represents your total adjustments to income such as educator expenses, IRA deduction, student loan interest deduction, and other adjustments."
+    },
+    "FED.TTLINC": {
+      "type": "number",
+      "description": "Add lines 1z, 2b, 3b, 4b, 5b, 6b, 7, and 8. This is your total income. The amount includes wages, salaries, tips, interest, dividends, IRA distributions, pensions and annuities, social security benefits, capital gains, and other income."
+    },
+    "FED.TTLSS": {
+      "type": "number",
+      "description": "You should receive a Form SSA-1099 showing in box 3 the total social security benefits paid to you. Box 4 will show the amount of any benefits you repaid in 2023. If you received railroad retirement benefits treated as social security, you should receive a Form RRB-1099. Use the Social Security Benefits Worksheet in these instructions to see if any of your benefits are taxable."
+    },
+    "FED.WAGES": {
+      "type": "number",
+      "description": "Enter the total of all amounts reported on lines 1a through 1h. This represents your total wages, salaries, tips, and other compensation for the year."
+    },
+    "FED.WIDOWER": {
+      "type": "string",
+      "description": "You can check the \"Qualifying surviving spouse\" box and use joint return tax rates for 2023 if all of the following apply:\n1. Your spouse died in 2021 or 2022 and you didn't remarry before the end of 2023.\n2. You have a child or stepchild whom you can claim as a dependent or could claim as a dependent except that the child had gross income of $4,700 or more, filed a joint return, or you could be claimed as a dependent on someone else's return.\n3. This child lived in your home for all of 2024. Temporary absences, such as for school, vacation, or medical care, count as time lived in the home.\n4. You paid over half the cost of keeping up your home.\n5. You could have filed a joint return with your spouse the year your spouse died, even if you didn't actually do so."
+    },
+    "FED.X": {
+      "type": "string",
+      "description": "If you had a capital gain or (loss), attach Schedule D. If you don't have to file Schedule D but you have capital gain distributions, check the box on line 7. If you received capital gain distributions but weren't required to file Schedule D, your tax may be less if you used the Qualified Dividends and Capital Gain Tax Worksheet."
+    },
+    "FED.XITEMSTD": {
+      "type": "number",
+      "description": "Most Form 1040 filers can find their standard deduction by looking at the amounts listed to the left of line 12. If you checked any box under Standard Deduction on page 1 of Form 1040 or 1040-SR, use the appropriate worksheet or chart in the instructions to calculate your standard deduction. Otherwise, enter your itemized deductions from Schedule A."
+    },
+    "FED.XUNDER1": {
+      "type": "string",
+      "description": "If a dependent qualifies for the Child Tax Credit, check that box. See Schedule 8812 (Form 1040) and its instructions for information on figuring and claiming any child tax credit and credit for other dependents that you may qualify to claim"
+    },
+    "FED.ZIPCODE1": {
+      "type": "string",
+      "description": "Enter your ZIP code. If you have a foreign address, also complete the spaces below for foreign country name, province/state/county, and foreign postal code."
+    },
+    "X133.11.44": {
+      "type": "string",
+      "description": "If you have a foreign address, enter the name of the foreign province, state, county, or other subdivision in this field. Follow the country's practice for entering these subdivisions. Do not abbreviate the subdivision name."
+    },
+    "X133.11.45": {
+      "type": "string",
+      "description": "If you have a foreign address, enter the city name on the appropriate line. Don't enter any other information on that line, but also complete the spaces below that line. Don't abbreviate the country name. Follow the country's practice for entering the postal code and the name of the province, county, or state."
+    },
+    "X133.12.40": {
+      "type": "string",
+      "description": "If you can be claimed as a dependent on someone else's return, check the box. Someone claims you as a dependent if they list your name and SSN in the Dependents section of their return."
+    },
+    "X133.12.41": {
+      "type": "string",
+      "description": "Someone claims your spouse as a dependent if they list your or your spouse's name and SSN in the Dependents section of their return"
+    },
+    "X133.15.35": {
+      "type": "string",
+      "description": "Check the box on line 6c if you elect to use the lump-sum election method for your benefits. If any of your benefits are taxable for 2023 and they include a lump-sum benefit payment that was for an earlier year, you may be able to reduce the taxable amount with the lump-sum election. See Lump-Sum Election in Pub. 915 for details."
+    },
+    "X133.17.51": {
+      "type": "number",
+      "description": "Enter your qualified business income deduction from Form 8995 or Form 8995-A. The qualified business income deduction allows eligible self-employed and small business owners to deduct up to 20% of their qualified business income."
+    },
+    "X133.891.0": {
+      "type": "number",
+      "description": "Enter the amount from Schedule 1, line 10. This is your additional income that could not be entered directly on Form 1040."
+    },
+    "X133.891.19": {
+      "type": "number",
+      "description": "Add lines 12 and 13. This represents the total of your standard deduction (or itemized deductions) plus your Qualified Business Income Deduction."
+    },
+    "X133.895.12": {
+      "type": "string",
+      "description": "If you and your spouse choose to treat a nonresident alien or dual-status alien spouse as a U.S. resident for 2023, or if a prior year's choice to treat a nonresident alien spouse as a U.S. resident remains in effect for 2023, check the box and enter the name of the nonresident alien or dual-status alien spouse in the entry space."
+    },
+    "X133.895.13": {
+      "type": "string",
+      "description": "If you are married and your spouse was a nonresident alien or dual-status alien at any time during the tax year, and you are filing a joint return and you choose to be treated as a U.S. resident for the entire year, enter your spouse's name here. See Nonresident aliens and dual-status aliens, earlier, and attach a statement showing how you figured the tax if you elect to be taxed on your combined worldwide income."
+    },
+    "X133.980.0": {
+      "type": "number",
+      "description": "Enter the total amount from Form(s) W-2, box 1. If a joint return, also include your spouse's income from Form(s) W-2, box 1.\n\nIf you earned wages while you were an inmate in a penal institution, report these amounts on Schedule 1, line 8u. Do not report these wages on line 1a. See the instructions for Schedule 1, line 8u.\n\nIf you received a pension or annuity from a nonqualified deferred compensation plan or a nongovernmental section 457(b) plan and it was reported in box 1 of Form W-2, do not include this amount on Form 1040, line 1a. This amount is reported on Schedule 1, line 8t."
+    },
+    "X133.980.1": {
+      "type": "number",
+      "description": "Enter the total of your wages received as a household employee that was not reported on Form(s) W-2. An employer isn't required to provide a Form W-2 to you if they paid you wages of less than $2,700 in 2024. For information on employment taxes for household employees, see Tax Topic 756."
+    },
+    "X133.980.2": {
+      "type": "number",
+      "description": "Enter the total of your tip income that was not reported on Form 1040, line 1a. This should include any tip income you didn't report to your employer and any allocated tips shown in box 8 on your Form(s) W-2 unless you can prove that your unreported tips are less than the amount in box 8. Allocated tips aren't included as income in box 1. See Pub. 531 for more details. Also include the value of any noncash tips you received, such as tickets, passes, or other items of value. Although you don't report these noncash tips to your employer, you must report them on line 1c.\n\nYou may owe social security and Medicare or railroad retirement (RRTA) tax on unreported tips. See the instructions for Schedule 2, line 5."
+    },
+    "X133.980.3": {
+      "type": "number",
+      "description": "Enter your taxable Medicaid waiver payments that were not reported on Form(s) W-2. Also enter the total of your taxable and nontaxable Medicaid waiver payments that were not reported on Form(s) W-2, or not reported in box 1 of Form(s) W-2, if you choose to include nontaxable payments in earned income for purposes of claiming a credit or other tax benefit. If you and your spouse can make different choices about including payments in earned income, see the instructions for Schedule 1, line 8s. If you are a sole proprietor in a business of providing home care services, see the Schedule C instructions for how to report these amounts.\n\nYour nontaxable Medicaid waiver payments may have been reported to you on Form(s) W-2, box 12, with Code LL."
+    },
+    "X133.980.5": {
+      "type": "number",
+      "description": "Enter the total of your employer-provided adoption benefits from Form 8839, line 29. Employer-provided adoption benefits should be shown in box 12 of your Form(s) W-2 with code T. But see the Instructions for Form 8839 to find out if you can exclude part or all of the benefits. You may also be able to exclude amounts if you adopted a child with special needs and the adoption became final in 2023."
+    },
+    "X133.980.6": {
+      "type": "number",
+      "description": "Enter the total of your wages from Form 8919, line 6."
+    },
+    "X133.980.7": {
+      "type": "number",
+      "description": "The following types of income must be included in the total on line 1h:\n• Strike or lockout benefits (other than bona fide gifts).\n• Excess elective deferrals. The amount deferred should be shown in box 12 of your Form W-2, and the \"Retirement plan\" box in box 13 should be checked.\n• Scholarship and fellowship grants not reported on Form W-2\n• Nontaxable combat pay if electing to include in earned income for calculating certain credits"
+    },
+    "X133.HOHMFSQW": {
+      "type": "string",
+      "description": "If you checked the MFS (Married Filing Separately) box, enter your spouse's name. If you checked the HOH (Head of Household) or QSS (Qualifying Surviving Spouse) box, enter the child's name if the qualifying person is a child but not your dependent."
+    },
+    "X133.VIRCURN": {
+      "type": "string",
+      "description": "Digital assets are any digital representations of value recorded on a cryptographically secured distributed ledger. For example, digital assets include non-fungible tokens (NFTs) and virtual currencies, such as cryptocurrencies and stablecoins. Check \"Yes\" if at any time during 2023, you: received digital assets as payment for property or services; received digital assets as a reward or award; received new digital assets from mining, staking or similar activities; received digital assets from a hard fork; disposed of digital assets in exchange for property or services; disposed of a digital asset in exchange or trade for another digital asset; sold a digital asset; or otherwise disposed of any other financial interest in a digital asset."
+    },
+    "X133.VIRCURY": {
+      "type": "string",
+      "description": "Digital assets are any digital representations of value recorded on a cryptographically secured distributed ledger. For example, digital assets include non-fungible tokens (NFTs) and virtual currencies, such as cryptocurrencies and stablecoins. Check \"Yes\" if at any time during 2023, you: received digital assets as payment for property or services; received digital assets as a reward or award; received new digital assets from mining, staking or similar activities; received digital assets from a hard fork; disposed of digital assets in exchange for property or services; disposed of a digital asset in exchange or trade for another digital asset; sold a digital asset; or otherwise disposed of any other financial interest in a digital asset."
+    }
+  },
+  "additionalProperties": false
+}

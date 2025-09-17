@@ -18,4 +18,5 @@ project_metadata/
 .mypy_cache/
 .ruff_cache/
 .coverage
-testing_files/reducto_files/output_json/
+testing_files/reducto_files/output_json/*
+testing_files/reducto_files/output_json/.gitkeep
