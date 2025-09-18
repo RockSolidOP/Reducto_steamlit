@@ -88,6 +88,31 @@ Notes:
 - Uploads `testing_files/sample_multiple.pdf`.
 - If a corporate proxy is set in the script, it will try to use it; if the proxy is not resolvable, it prints a message and falls back to direct with bounded timeouts.
 
+
+### Rancher Desktop (Windows)
+
+- Install Rancher Desktop (Step-by-Step):
+  - https://trten.sharepoint.com/sites/intr-docker/SitePages/Install-Rancher-Desktop(-Step-by-Step.aspx
+- If WSL2 is not installed yet (Windows):
+  - https://learn.microsoft.com/windows/wsl/install
+
+Notes for Rancher Desktop on Windows:
+- Container runtime: Select `dockerd (moby)` in Rancher Desktop → Settings → Container Engine. This ensures the `docker` CLI works as expected. If you previously used `containerd`, switch to `dockerd` and restart Rancher Desktop.
+- Kubernetes: Disable Kubernetes in Rancher Desktop unless you specifically need it, to avoid port/resource conflicts.
+- WSL2 backend: Ensure WSL2 is installed and enabled; set default with `wsl --set-default-version 2`. A reboot may be required after enabling Windows features.
+
+Troubleshooting (Rancher Desktop + WSL2):
+- `docker: command not found` or `Cannot connect to the Docker daemon`:
+  - Verify Rancher Desktop is running and the runtime is set to `dockerd (moby)`.
+  - Close and reopen your terminal after switching runtimes.
+- Images/containers not visible after switching runtime:
+  - `containerd` and `dockerd` keep separate stores. Re-pull images after switching, or stick to `dockerd` for this project.
+- WSL errors (e.g., 0x80370102):
+  - Ensure virtualization is enabled in BIOS, and Windows features "Virtual Machine Platform" and "Windows Subsystem for Linux" are enabled. Then run `wsl --install` and reboot.
+- Network/proxy issues:
+  - If behind a corporate proxy, configure proxy in Rancher Desktop (Settings → Network) and/or use `.env` as described in Proxy Options.
+
+
 ## Docker (recommended for “it just runs”)
 
 Build the image:
@@ -117,6 +142,7 @@ docker run --rm -it \
 ```
 
 Open http://localhost:8501 in your browser.
+
 
 ## Proxy Options
 
