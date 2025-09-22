@@ -31,33 +31,7 @@ class Tab(Protocol):
     def render(self, state: AppState) -> None: ...
 
 
-def render_options_expander(state: AppState) -> bool:
-    """Render the Azure options expander shown in the left column.
-
-    Returns True when the user clicks the Run button (trigger for default Azure run).
-    """
-    did_trigger = False
-    with st.expander("Azure AI Options", expanded=False):
-        col1, col2 = st.columns(2)
-        with col1:
-            az_model_opt = st.text_input(
-                "Model id",
-                value=state.azure_default_model,
-                help="e.g., prebuilt-document, prebuilt-invoice, or a custom model id",
-                key="az_default_model_input",
-            )
-        with col2:
-            az_pages_opt = st.text_input(
-                "Pages (optional)",
-                value=state.azure_default_pages,
-                help="Azure pages string like 6 or 18-19 or 1,3,5-7",
-                key="az_default_pages_input",
-            )
-        if st.button("Run Azure AI", type="primary", key="run_azure_adv"):
-            state.azure_default_model = az_model_opt.strip()
-            state.azure_default_pages = az_pages_opt.strip()
-            did_trigger = True
-    return did_trigger
+# Left-column expander removed. All Azure controls live inside the tab now.
 
 
 def render_cost_estimator(page_count: int, current_page: int, *, per_page_price_default: float = 0.10) -> None:
@@ -283,4 +257,3 @@ class AzureTab:
                     st.code(f"{type(e).__name__}: {e}")
                     with st.expander("Full traceback"):
                         st.exception(traceback.format_exc())
-

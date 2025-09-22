@@ -34,39 +34,7 @@ class Tab(Protocol):
     def render(self, state: AppState) -> None: ...
 
 
-def render_options_expander(state: AppState, *, page_count: int, page_number: int) -> bool:
-    """Render the Reducto options expander in the left column.
-
-    Returns True when the action button is clicked (trigger run).
-    """
-    did_trigger = False
-    with st.expander("Reducto Options", expanded=False):
-        r_col1, r_col2 = st.columns(2)
-        with r_col1:
-            red_start = st.number_input(
-                "Start page",
-                min_value=1,
-                max_value=max(1, page_count),
-                value=int(page_number),
-                step=1,
-                key="red_start",
-            )
-        with r_col2:
-            red_end = st.number_input(
-                "End page",
-                min_value=1,
-                max_value=max(1, page_count),
-                value=int(page_number),
-                step=1,
-                key="red_end",
-            )
-        run_reducto_adv = st.button("Run Reducto", type="primary", key="run_reducto_adv")
-        if run_reducto_adv:
-            state.use_reducto_range = True
-            state.reducto_start_page = int(red_start)
-            state.reducto_end_page = int(red_end)
-            did_trigger = True
-    return did_trigger
+# Left-column expander removed. All Reducto controls live inside the tab now.
 
 
 def run_results(state: AppState, pdf_path: Path, page_number: int) -> None:
@@ -484,7 +452,7 @@ class ReductoTab:
             with run_col1:
                 run_schema = st.button("Run Schema Extraction", type="primary", key="btn_run_schema_extract")
             with run_col2:
-                st.caption("Uses Start/End from Simple Extract or left options.")
+                st.caption("Uses Start/End from the Simple Extract tab above.")
 
             if run_schema:
                 try:
@@ -496,17 +464,9 @@ class ReductoTab:
                         st.exception(traceback.format_exc())
                     st.stop()
 
-                # Resolve page range from either tab inputs or left options
-                s_page = int(
-                    st.session_state.get("red_start_tab")
-                    or st.session_state.get("red_start")
-                    or st.session_state.get("page_number_ui", 1)
-                )
-                e_page = int(
-                    st.session_state.get("red_end_tab")
-                    or st.session_state.get("red_end")
-                    or s_page
-                )
+                # Resolve page range from tab inputs only
+                s_page = int(st.session_state.get("red_start_tab") or st.session_state.get("page_number_ui", 1))
+                e_page = int(st.session_state.get("red_end_tab") or s_page)
 
                 # Resolve current PDF path from state
                 pdf_path = st.session_state.get("uploaded_pdf_path") or st.session_state.get("pdf_path")

@@ -8,9 +8,9 @@ import streamlit as st
 
 from app.config import UPLOADS_CLEANUP, AZURE_CONFIG
 from app.state.session import get_state
-from app.ui.azure_tab import AzureTab, render_options_expander as az_opts_expander, render_cost_estimator
-from app.ui.pymupdf_tab import PyMuPDFTab, render_options_expander as pym_opts_expander, run_results as run_pymupdf
-from app.ui.reducto_tab import ReductoTab, render_options_expander as red_opts_expander, run_results as run_reducto
+from app.ui.azure_tab import AzureTab, render_cost_estimator
+from app.ui.pymupdf_tab import PyMuPDFTab, run_results as run_pymupdf
+from app.ui.reducto_tab import ReductoTab, run_results as run_reducto
 from app.ui.debug import debug_panel
 from app.ui.components import file_uploader
 from app.utils.pdf_preview import render_pdf_page_png_bytes
@@ -92,10 +92,7 @@ def run() -> None:
         st.session_state["page_number_ui"] = int(page_number)
         st.session_state["page_count_ui"] = int(page_count)
 
-        # Consistent options panels (left column)
-        trig_red = red_opts_expander(state, page_count=page_count, page_number=int(page_number))
-        trig_az = az_opts_expander(state)
-        trig_pym = pym_opts_expander(state)
+        # Options expanders removed: controls are available inside each tab
 
     # Always show a page preview
     png_bytes = render_pdf_page_png_bytes(pdf_path, int(page_number), zoom=2.0)
@@ -114,10 +111,10 @@ def run() -> None:
         with ctx:
             t.render(state)
 
-    # Gather triggers from both expanders and tabs
-    do_process = bool(trig_red or st.session_state.pop("trigger_reducto", False))
-    do_process_azure = bool(trig_az or st.session_state.pop("trigger_azure_default", False))
-    do_process_pymupdf = bool(trig_pym or st.session_state.pop("trigger_pymupdf", False))
+    # Gather triggers from tabs only
+    do_process = bool(st.session_state.pop("trigger_reducto", False))
+    do_process_azure = bool(st.session_state.pop("trigger_azure_default", False))
+    do_process_pymupdf = bool(st.session_state.pop("trigger_pymupdf", False))
 
     # Execute runs (below tabs), preserving original prompts
     if do_process:
@@ -137,4 +134,3 @@ def run() -> None:
 
 if __name__ == "__main__":
     run()
-

@@ -26,21 +26,7 @@ class Tab(Protocol):
     def render(self, state: AppState) -> None: ...
 
 
-def render_options_expander(state: AppState) -> bool:
-    """Render the PyMuPDF options expander in the left column and return trigger flag."""
-    did_trigger = False
-    with st.expander("PyMuPDF Options", expanded=False):
-        scope_all_opt = st.checkbox(
-            "Analyze all pages (text + heuristics)",
-            value=state.pym_scope_all,
-            help="Unchecked: use the selected page only. Checked: use the entire document.",
-            key="pym_scope_all_opt",
-        )
-        run_pymupdf_adv = st.button("Run PyMuPDF", type="primary", key="run_pymupdf_adv")
-        if run_pymupdf_adv:
-            state.pym_scope_all = bool(scope_all_opt)
-            did_trigger = True
-    return did_trigger
+# Left-column expander removed. All PyMuPDF controls live inside the tab now.
 
 
 def run_results(state: AppState, pdf_path: Path, page_number: int, page_count: int) -> None:
@@ -141,4 +127,3 @@ class PyMuPDFTab:
             state.pym_scope_all = bool(scope_all_opt)
             state.pym_pages_spec = pym_pages_spec.strip()
             st.session_state["trigger_pymupdf"] = True
-
