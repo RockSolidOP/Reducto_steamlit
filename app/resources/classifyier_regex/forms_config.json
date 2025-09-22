@@ -1,0 +1,120 @@
+{
+  "weights": { "header": 1.4, "body": 1.0, "footer": 1.2 },
+  "families": [
+    { "name": "1040", "patterns": [
+      {"re": "U\\.?S\\.?\\s+Individual\\s+Income\\s+Tax\\s+Return", "w": 3.0},
+      {"re": "\\bSchedule\\s*(?:A|1|E|F|C)\\s*\\(\\s*Form\\s*1040\\s*\\)", "w": 2.0},
+      {"re": "Refund", "w": 1.2},
+      {"re": "Direct\\s+deposit|Routing\\s+number", "w": 1.2},
+      {"re": "Sign\\s+Here|Amount\\s+you\\s+owe", "w": 1.2}
+    ], "avoid": [
+      "Filing\\s+Instructions", "\\bThis\\s+letter\\b", "\\bDear\\b", "\\bNotice\\s+(?:CP|LT|LTR)?\\-?\\d+\\b"
+    ]},
+    { "name": "FinCEN 114", "patterns": ["\\bFinCEN\\s*114\\b"], "avoid": ["Filing\\s+Instructions"] },
+    { "name": "114a", "patterns": [
+      "\\bForm\\s*114a\\b",
+      "Record\\s+of\\s+Authorization\\s+to\\s+Electronically\\s+File\\s+FBARs"
+    ], "avoid": ["Filing\\s+Instructions"] },
+    { "name": "Form 5329", "patterns": ["\\bForm\\s*5329\\b"] },
+    { "name": "Form 6251", "patterns": [
+      {"re": "\\bForm\\s*6251\\b", "w": 3.0},
+      {"re": "Alternative\\s+Minimum\\s+Tax", "w": 1.0}
+    ], "must": ["\\bForm\\s*6251\\b"], "avoid": [
+      "Credit\\s+for\\s+Prior\\s+Year\\s+Minimum\\s+Tax", "\\bForm\\s*8801\\b",
+      "\\bForm\\s*8582\\b", "Passive\\s+Activity\\s+Loss\\s+Limitations"
+    ] },
+    { "name": "Form 6252", "patterns": [
+      "\\bForm\\s*6252\\b",
+      "Installment\\s+Sale\\s+Income"
+    ]},
+    { "name": "Form 8582", "patterns": [
+      "\\bForm\\s*8582\\b",
+      "Passive\\s+Activity\\s+Loss\\s+Limitations"
+    ]},
+    { "name": "Form 8801", "patterns": [
+      {"re": "\\bForm\\s*8801\\b", "w": 3.0},
+      {"re": "Credit\\s+for\\s+Prior\\s+Year\\s+Minimum\\s+Tax", "w": 3.0}
+    ], "must": ["\\bForm\\s*8801\\b"], "avoid": ["Alternative\\s+Minimum\\s+Tax", "\\bForm\\s*6251\\b"] }
+  ],
+  "labels": [
+    { "label": "Other", "family": "Other", "description": "Generic/non-form content (e.g., cover, letter, slipsheet, invoice).", "patterns": [
+      "\\bFiling\\s+Instructions\\b",
+      "\\bThis\\s+letter\\b",
+      "\\bDear\\b",
+      "\\bNotice\\s+(?:CP|LT|LTR)?\\-?\\d+\\b"
+    ]},
+    { "label": "Filing Instructions", "family": "Other", "description": "Generic filing instructions page.",
+      "patterns": [ {"re": "\\bFiling\\s+Instructions\\b", "w": 3.0}, {"re": "BSA\\s+E-?Filing", "w": 2.0} ] },
+
+    { "label": "114a Record of Authorization to Electronically File FBARs", "family": "114a", "description": "Form 114a header; 'Record of Authorization to Electronically File FBARs'.", "patterns": [
+      "\\bForm\\s*114a\\b",
+      "Record\\s+of\\s+Authorization\\s+to\\s+Electronically\\s+File\\s+FBARs"
+    ]},
+    { "label": "FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 1", "family": "FinCEN 114", "description": "FinCEN 114 Page 1; Part I – Filer Information.",
+      "patterns": [ {"re": "\\bFinCEN\\s*114\\b.*\\bPage\\s*1\\b", "w": 3.0}, {"re": "\\bPart\\s*I\\b.*Filer\\s+Information", "w": 2.0} ],
+      "avoid": ["Filing\\s+Instructions"] },
+    { "label": "FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 2", "family": "FinCEN 114", "description": "FinCEN 114 Page 2; Part II – Owned Separately.",
+      "patterns": [ {"re": "\\bFinCEN\\s*114\\b.*\\bPage\\s*2\\b", "w": 3.0}, {"re": "\\bPart\\s*II\\b.*Owned\\s+Separately", "w": 2.0} ],
+      "avoid": ["Filing\\s+Instructions"] },
+    { "label": "FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 3", "family": "FinCEN 114", "description": "FinCEN 114 Page 3; Part III – Owned Jointly.",
+      "patterns": [ {"re": "\\bFinCEN\\s*114\\b.*\\bPage\\s*3\\b", "w": 3.0}, {"re": "\\bPart\\s*III\\b.*Owned\\s+Jointly", "w": 2.0} ],
+      "avoid": ["Filing\\s+Instructions"] },
+    { "label": "FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 5", "family": "FinCEN 114", "description": "FinCEN 114 Page 5; Third Party Preparer, Filer signature PIN.",
+      "patterns": [ {"re": "\\bFinCEN\\s*114\\b.*\\bPage\\s*5\\b", "w": 3.0}, {"re": "Third\\s+Party\\s+Preparer\\s+Use\\s+Only|Filer\\s+signature\\s+PIN", "w": 2.0} ],
+      "avoid": ["Filing\\s+Instructions"] },
+
+    { "label": "1040_Main_Pg1", "family": "1040", "description": "Form 1040 Page 1; Filing Status, Standard Deduction, Dependents.",
+      "patterns": [ {"re": "U\\.?S\\.?\\s+Individual\\s+Income\\s+Tax\\s+Return.*Form\\s*1040(?:-SR)?\\b.*Page\\s*1\\b", "w": 3.0},
+                     {"re": "\\bFiling\\s+Status\\b|\\bStandard\\s+Deduction\\b|\\bDependents\\b", "w": 2.0} ],
+      "avoid": ["Schedule\\s*(?:A|1|E|F|C)\\s*\\(\\s*Form\\s*1040\\s*\\)"] },
+    { "label": "1040_Main_Pg2", "family": "1040", "description": "Form 1040 Page 2; Refund, Amount you owe, Direct deposit, Sign Here.",
+      "patterns": [ {"re": "U\\.?S\\.?\\s+Individual\\s+Income\\s+Tax\\s+Return.*Form\\s*1040(?:-SR)?\\b.*Page\\s*2\\b", "w": 3.0},
+                     {"re": "\\bRefund\\b|\\bAmount\\s+you\\s+owe\\b|\\bDirect\\s+deposit\\b|\\bSign\\s+Here\\b|Paid\\s+Preparer\\s+Use\\s+Only|Third\\s+party\\s+designee", "w": 2.0} ],
+      "avoid": ["Schedule\\s*(?:A|1|E|F|C)\\s*\\(\\s*Form\\s*1040\\s*\\)"] },
+    { "label": "1040_Schedule_1", "family": "1040", "description": "Schedule 1 (Form 1040).",
+      "patterns": [ {"re": "\\bSchedule\\s*1\\s*\\(\\s*Form\\s*1040\\s*\\)\\b", "w": 3.0},
+                     {"re": "Additional\\s+Income\\s+and\\s+Adjustments\\s+to\\s+Income", "w": 2.0} ] },
+    { "label": "1040_Schedule_C", "family": "1040", "description": "Schedule C – Profit or Loss From Business.",
+      "patterns": [ {"re": "\\bSchedule\\s*C\\s*\\(\\s*Form\\s*1040\\s*\\)\\b", "w": 3.0},
+                     {"re": "Profit\\s+or\\s+Loss\\s+From\\s+Business", "w": 2.0} ] },
+    { "label": "1040_Schedule_E", "family": "1040", "description": "Schedule E – Supplemental Income and Loss (Pg 1).",
+      "patterns": [ {"re": "\\bSchedule\\s*E\\s*\\(\\s*Form\\s*1040\\s*\\)\\b", "w": 3.0}, {"re": "Supplemental\\s+Income\\s+and\\s+Loss", "w": 2.0} ],
+      "avoid": ["U\\.?S\\.?\\s+Individual\\s+Income\\s+Tax\\s+Return", "\\bSchedule\\s*F\\s*\\(\\s*Form\\s*1040\\s*\\)\\b", "Profit\\s+or\\s+Loss\\s+From\\s+Farming"] },
+    { "label": "1040_Schedule_E_PG_2", "family": "1040", "description": "Schedule E Page 2 – Parts IV/V.",
+      "patterns": [ {"re": "\\bSchedule\\s*E\\s*\\(\\s*Form\\s*1040\\s*\\)\\b.*\\bPage\\s*2\\b", "w": 3.0}, {"re": "\\bPart\\s*IV\\b|\\bPart\\s*V\\b", "w": 2.0} ],
+      "must": ["Page\\s*2|Part\\s*(?:IV|V)"] },
+    { "label": "1040_Schedule_F", "family": "1040", "description": "Schedule F – Profit or Loss From Farming.",
+      "patterns": [ {"re": "\\bSchedule\\s*F\\s*\\(\\s*Form\\s*1040\\s*\\)\\b", "w": 3.0},
+                     {"re": "Profit\\s+or\\s+Loss\\s+From\\s+Farming", "w": 2.0},
+                     {"re": "Farm\\s+income|Farm\\s+expenses", "w": 1.5} ],
+      "avoid": ["\\bSchedule\\s*E\\s*\\(\\s*Form\\s*1040\\s*\\)\\b", "Supplemental\\s+Income\\s+and\\s+Loss"] },
+
+    { "label": "Form 5329", "family": "Form 5329", "description": "Form 5329 header present.", "patterns": ["\\bForm\\s*5329\\b"] },
+    { "label": "Form 5329 Pg 1", "family": "Form 5329", "description": "Form 5329 Page 1 – Part I.", "patterns": ["\\bForm\\s*5329\\b.*\\bPage\\s*1\\b", "\\bPart\\s*I\\b"] },
+    { "label": "Form 5329 Pg 2", "family": "Form 5329", "description": "Form 5329 Page 2 – Parts IV/V.", "patterns": ["\\bForm\\s*5329\\b.*\\bPage\\s*2\\b", "\\bPart\\s*IV\\b|\\bPart\\s*V\\b"] },
+    { "label": "Form 5329 Pg 3", "family": "Form 5329", "description": "Form 5329 Page 3 – Parts VIII/IX.", "patterns": ["\\bForm\\s*5329\\b.*\\bPage\\s*3\\b", "\\bPart\\s*VIII\\b|\\bPart\\s*IX\\b"] },
+
+    { "label": "Form 6251", "family": "Form 6251", "description": "Form 6251 – Alternative Minimum Tax.",
+      "patterns": [ {"re": "\\bForm\\s*6251\\b", "w": 2.0}, {"re": "Alternative\\s+Minimum\\s+Tax", "w": 2.0} ],
+      "must": ["Alternative\\s+Minimum\\s+Tax"], "avoid": ["Credit\\s+for\\s+Prior\\s+Year\\s+Minimum\\s+Tax"] },
+    { "label": "Form 6252", "family": "Form 6252", "description": "Form 6252 – Installment Sale Income.",
+      "patterns": [ {"re": "\\bForm\\s*6252\\b", "w": 2.0}, {"re": "Installment\\s+Sale\\s+Income", "w": 2.0} ] },
+    { "label": "Form 8801", "family": "Form 8801", "description": "Form 8801 – Credit for Prior Year Minimum Tax.",
+      "patterns": [ {"re": "\\bForm\\s*8801\\b", "w": 2.0}, {"re": "Credit\\s+for\\s+Prior\\s+Year\\s+Minimum\\s+Tax", "w": 3.0} ],
+      "must": ["Credit\\s+for\\s+Prior\\s+Year\\s+Minimum\\s+Tax"], "avoid": ["Alternative\\s+Minimum\\s+Tax"] },
+
+    { "label": "Form 8582", "family": "Form 8582", "description": "Form 8582 – Passive Activity Loss Limitations.",
+      "patterns": [ {"re": "\\bForm\\s*8582\\b", "w": 2.0}, {"re": "Passive\\s+Activity\\s+Loss\\s+Limitations", "w": 2.0} ] },
+    { "label": "Form 8582 Pg 1", "family": "Form 8582", "description": "Form 8582 Page 1 – Part I.",
+      "patterns": [ {"re": "\\bForm\\s*8582\\b.*\\bPage\\s*1\\b", "w": 3.0}, {"re": "\\bPart\\s*I\\b", "w": 2.0} ] },
+    { "label": "Form 8582 Pg 2", "family": "Form 8582", "description": "Form 8582 Page 2 – Part II/III.",
+      "patterns": [ {"re": "\\bForm\\s*8582\\b.*\\bPage\\s*2\\b", "w": 3.0}, {"re": "\\bPart\\s*II\\b|\\bPart\\s*III\\b", "w": 2.0} ],
+      "must": ["Page\\s*2|Part\\s*(?:II|III)"] },
+
+    { "label": "Federal Statements - Form 6252 Line 29e", "family": "Form 6252", "description": "Statement/worksheet referencing Form 6252 line 29e.",
+      "patterns": [ {"re": "\\bLine\\s*29e\\b", "w": 3.0}, {"re": "\\bStatement\\b|Worksheet", "w": 2.0}, {"re": "6252", "w": 1.5} ],
+      "avoid": ["Installment\\s+Sale\\s+Income"] }
+  ],
+  "smoothing": { "enable": true }
+}
+
