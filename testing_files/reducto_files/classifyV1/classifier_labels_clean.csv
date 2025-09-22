@@ -1,0 +1,54 @@
+page,label,description
+1,Other,"Generic/non-form content (e.g., cover, slipsheet, transmittal, invoice). No consistent IRS/FinCEN form headers present; classify as Other."
+2,FinCEN Form 114,Header contains 'FinCEN 114 – Report of Foreign Bank and Financial Accounts' and 'Part I – Filer Information'.
+3,114a Record of Authorization to Electronically File FBARs,Header shows 'Form 114a' and 'Record of Authorization to Electronically File FBARs'; 'Do not send to FinCEN'.
+4,FinCEN Form 114 Filing Instructions,Title includes 'Filing Instructions – FinCEN Form 114' and references 'BSA E‑Filing System'.
+5,114a Record of Authorization to Electronically File FBARs,"Same as page 3; 'Form 114a May 2015', 'Persons who have an obligation to file FBARs' wording."
+6,"FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 1","Header 'Form FinCEN 114 – Report of Foreign Bank and Financial Accounts, Page 1'; calendar year and TIN blocks."
+7,"FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 2",Header 'Form FinCEN 114 … Page 2'; 'Part II – Information on Financial Account(s) Owned Separately'.
+8,"FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 3",Header 'Form FinCEN 114 … Page 3'; 'Part III – Information on Financial Account(s) Owned Jointly'.
+9,"FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 5","Header 'Form FinCEN 114 … Page 5'; 'Third Party Preparer Use Only', 'Filer signature PIN'."
+10,"FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 1",Second filing; same 'Form FinCEN 114 … Page 1' header and Part I blocks.
+11,"FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 2",Second filing; 'Part II – Information on Financial Account(s) Owned Separately'.
+12,"FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 3",Second filing; 'Part III – Information on Financial Account(s) Owned Jointly'.
+13,"FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 5","Second filing; 'Third Party Preparer Use Only', 'Filer signature PIN'."
+14,Other,"Generic/non-form content (e.g., cover, slipsheet, transmittal, invoice). No consistent IRS/FinCEN form headers present; classify as Other."
+15,Other,"Generic/non-form content (e.g., cover, slipsheet, transmittal, invoice). No consistent IRS/FinCEN form headers present; classify as Other."
+16,Filing Instructions,Generic 'Filing Instructions' header without FinCEN phrasing; procedural text.
+17,Other,"Generic/non-form content (e.g., cover, slipsheet, transmittal, invoice). No consistent IRS/FinCEN form headers present; classify as Other."
+18,1040_Main_Pg1,Header 'Form 1040 (20xx) Page 1'; name/SSN blocks and filing status area.
+19,1040_Main_Pg2,Header 'Form 1040 (20xx) Page 2'; refund/direct deposit section (routing/account numbers).
+20,1040_Schedule_1,Header 'Schedule 1 (Form 1040)'; 'Additional Income and Adjustments to Income'.
+21,1040_Schedule_A,Header 'SCHEDULE A' and 'Itemized Deductions'; 'Attach to Form 1040 or 1040‑SR'.
+22,1040_Schedule_A,Continuation of Schedule A with same header; lines for deductions roll‑up.
+23,1040_Schedule_E,Header 'Schedule E (Form 1040)'; 'Supplemental Income and Loss' (rents/royalties/partnerships).
+24,1040_Schedule_E_PG_2,Header 'Schedule E (Form 1040) Page 2'; 'Reconciliation' and totals lines 29a/29b.
+25,1040_Schedule_F,Header 'Schedule F (Form 1040)'; 'Profit or Loss From Farming' with farm income/expense lines.
+26,Form 5329,Header 'Form 5329'; 'Additional Taxes on Qualified Plans (Including IRAs) and Other Tax‑Favored Accounts'; Parts I–IX.
+27,Form 5329,Header 'Form 5329'; 'Additional Taxes on Qualified Plans (Including IRAs) and Other Tax‑Favored Accounts'; Parts I–IX.
+28,Form 5329,Header 'Form 5329'; 'Additional Taxes on Qualified Plans (Including IRAs) and Other Tax‑Favored Accounts'; Parts I–IX.
+29,1040_Schedule_1,Header 'Schedule 1 (Form 1040)'; Additional Income/Adjustments.
+30,Form 6252,Header 'Form 6252'; 'Installment Sale Income'; buyer's name/TIN; gross profit percentage.
+31,Form 6252,Header 'Form 6252'; 'Installment Sale Income'; buyer's name/TIN; gross profit percentage.
+32,Form 6252,Header 'Form 6252'; 'Installment Sale Income'; buyer's name/TIN; gross profit percentage.
+33,Form 6252,Header 'Form 6252'; 'Installment Sale Income'; buyer's name/TIN; gross profit percentage.
+34,Form 6252,Header 'Form 6252'; 'Installment Sale Income'; buyer's name/TIN; gross profit percentage.
+35,Form 6252,Header 'Form 6252'; 'Installment Sale Income'; buyer's name/TIN; gross profit percentage.
+36,Form 6252,Header 'Form 6252'; 'Installment Sale Income'; buyer's name/TIN; gross profit percentage.
+37,Form 6251,Header 'Form 6251'; 'Alternative Minimum Tax—Individuals'; AMT computation lines.
+38,Form 6251,Header 'Form 6251'; 'Alternative Minimum Tax—Individuals'; AMT computation lines.
+39,Form 8582,Header 'Form 8582'; 'Passive Activity Loss Limitations'; sections for allowed losses and carryovers.
+40,Other,"Generic/non-form content (e.g., cover, slipsheet, transmittal, invoice). No consistent IRS/FinCEN form headers present; classify as Other."
+41,Form 8582,Header 'Form 8582'; 'Passive Activity Loss Limitations'; sections for allowed losses and carryovers.
+42,Other,"Generic/non-form content (e.g., cover, slipsheet, transmittal, invoice). No consistent IRS/FinCEN form headers present; classify as Other."
+43,Form 6252,Header 'Form 6252'; 'Installment Sale Income'; buyer's name/TIN; gross profit percentage.
+44,Form 6252,Header 'Form 6252'; 'Installment Sale Income'; buyer's name/TIN; gross profit percentage.
+,,
+,1040_Schedule_C,Header 'Schedule C (Form 1040)'; 'Profit or Loss From Business' (Sole Proprietorship).
+,Form 8801,Header 'Form 8801'; 'Credit for Prior Year Minimum Tax'.
+,Form 8582 Pg 1,Header 'Form 8582'; 'Passive Activity Loss Limitations'; 'Page 1' or 'Part I'.
+,Form 8582 Pg 2,Header 'Form 8582'; 'Passive Activity Loss Limitations'; 'Page 2' or 'Part II/III'.
+,Form 5329 Pg 1,Header 'Form 5329'; 'Additional Taxes on Qualified Plans (Including IRAs) and Other Tax-Favored Accounts'; 'Page 1' or 'Part I'.
+,Form 5329 Pg 2,Header 'Form 5329'; 'Additional Taxes on Qualified Plans (Including IRAs) and Other Tax-Favored Accounts'; 'Page 2' or 'Part IV/V'.
+,Form 5329 Pg 3,Header 'Form 5329'; 'Additional Taxes on Qualified Plans (Including IRAs) and Other Tax-Favored Accounts'; 'Page 3' or 'Part VIII/IX'.
+,Federal Statements - Form 6252 Line 29e,Statement or worksheet related to 'Form 6252 line 29e'; may include 'Statement', 'Worksheet', or 'Line 29e' text.

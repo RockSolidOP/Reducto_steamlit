@@ -15,8 +15,15 @@ def extract_with_azure(pdf_filepath):
     # ---- Check for Azure Credentials
     load_dotenv()
 
-    endpoint = os.getenv("AZURE_ENDPOINT")
-    key = os.getenv("AZURE_KEY")
+    # Support both naming conventions used across the repo/README
+    endpoint = (
+        os.getenv("AZURE_DOC_AI_ENDPOINT")
+        or os.getenv("AZURE_ENDPOINT")
+    )
+    key = (
+        os.getenv("AZURE_DOC_AI_KEY")
+        or os.getenv("AZURE_KEY")
+    )
 
     if not endpoint or not key:
         return {
@@ -66,7 +73,7 @@ def extract_with_azure(pdf_filepath):
     
     # ---- Iterate through doucments
     for i, doc in enumerate(document_list):
-        print(f"\n------------ PROCESSING DOCUMENT {i+1}: {doc.get("docType", "N/A")}")
+        print(f"\n------------ PROCESSING DOCUMENT {i+1}: {doc.get('docType', 'N/A')}")
         if selected_fields:
             filtered_fields = {k: v for k, v in doc.get("fields", {}).items() if k in selected_fields}
             doc["fields"] = filtered_fields

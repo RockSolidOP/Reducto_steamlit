@@ -1,0 +1,45 @@
+page,predicted_family,family_confidence,family_method,predicted_label,confidence,method
+1,Other,0.0,default_other,Other,0.0,default_other
+2,Other,0.99,heuristic,Other,0.0,default_other
+3,114a,0.95,heuristic,114a Record of Authorization to Electronically File FBARs,0.97,heuristic
+4,Other,0.99,heuristic,Other,0.0,default_other
+5,114a,0.95,heuristic,114a Record of Authorization to Electronically File FBARs,0.97,heuristic
+6,FinCEN 114,0.95,heuristic,"FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 1",0.98,heuristic
+7,FinCEN 114,0.95,heuristic,"FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 2",0.98,heuristic
+8,FinCEN 114,0.95,heuristic,"FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 3",0.98,heuristic
+9,FinCEN 114,0.95,heuristic,"FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 5",0.98,heuristic
+10,FinCEN 114,0.95,heuristic,"FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 1",0.98,heuristic
+11,FinCEN 114,0.95,heuristic,"FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 2",0.98,heuristic
+12,FinCEN 114,0.95,heuristic,"FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 3",0.98,heuristic
+13,FinCEN 114,0.95,heuristic,"FinCEN 114 - Report of Foreign Bank and Financial Accounts, Pg 5",0.98,heuristic
+14,Other,0.92,heuristic,Other,0.0,default_other
+15,Other,0.0,default_other,Other,0.0,default_other
+16,Other,0.99,heuristic,Other,0.0,default_other
+17,Other,0.0,default_other,Other,0.0,default_other
+18,1040,0.9,heuristic,1040_Main_Pg1,0.93,heuristic
+19,Other,0.0,default_other,Other,0.0,default_other
+20,1040,0.9,heuristic,Other,0.0,default_other
+21,1040,0.9,heuristic,1040_Schedule_A,0.97,heuristic
+22,1040,0.9,heuristic,1040_Main_Pg2,0.94,heuristic
+23,1040,0.9,heuristic,Other,0.0,default_other
+24,1040,0.9,heuristic,1040_Schedule_E,0.96,heuristic
+25,1040,0.9,heuristic,1040_Schedule_E_PG_2,0.96,heuristic
+26,Form 5329,0.95,heuristic,Form 5329 Pg 1,0.96,heuristic
+27,Form 5329,0.95,heuristic,Form 5329 Pg 2,0.96,heuristic
+28,Form 5329,0.95,heuristic,Form 5329 Pg 3,0.95,heuristic
+29,Form 6251,0.95,heuristic,Form 6251,0.95,heuristic
+30,Form 6252,0.95,heuristic,Federal Statements - Form 6252 Line 29e,0.95,heuristic
+31,Form 6252,0.95,heuristic,Federal Statements - Form 6252 Line 29e,0.95,heuristic
+32,Form 6252,0.95,heuristic,Federal Statements - Form 6252 Line 29e,0.95,heuristic
+33,Form 6252,0.95,heuristic,Federal Statements - Form 6252 Line 29e,0.95,heuristic
+34,Form 6252,0.95,heuristic,Federal Statements - Form 6252 Line 29e,0.95,heuristic
+35,Form 6252,0.95,heuristic,Federal Statements - Form 6252 Line 29e,0.95,heuristic
+36,Form 6252,0.95,heuristic,Federal Statements - Form 6252 Line 29e,0.95,heuristic
+37,Form 6251,0.95,heuristic,Form 6251,0.95,heuristic
+38,Form 6251,0.95,heuristic,Form 6251,0.95,heuristic
+39,Form 8582,0.95,heuristic,Form 8582 Pg 1,0.96,heuristic
+40,Form 8582,0.95,heuristic,Form 8582 Pg 2,0.96,heuristic
+41,Form 8582,0.95,heuristic,Form 8582 Pg 1,0.96,heuristic
+42,Form 8582,0.95,heuristic,Form 8582 Pg 1,0.96,heuristic
+43,Form 6252,0.95,heuristic,Federal Statements - Form 6252 Line 29e,0.95,heuristic
+44,Form 6252,0.95,heuristic,Federal Statements - Form 6252 Line 29e,0.95,heuristic

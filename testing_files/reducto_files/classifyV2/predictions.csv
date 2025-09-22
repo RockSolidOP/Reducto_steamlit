@@ -1,0 +1,45 @@
+page,predicted_family,family_confidence,family_method,predicted_label,confidence,method
+1,Other,0.0,heuristic,Other,0.0,heuristic
+2,Other,0.0,heuristic,Filing_Instructions,9.2,heuristic
+3,114a,4.8,heuristic,114a_Record_of_Authorization_to_Electronically_File_FBARs,4.8,heuristic
+4,Other,0.0,heuristic,Filing_Instructions,9.2,heuristic
+5,114a,4.8,heuristic,114a_Record_of_Authorization_to_Electronically_File_FBARs,4.8,heuristic
+6,FinCEN 114,2.4,heuristic,"FinCEN_114_Report_of_Foreign_Bank_and_Financial_Accounts,_Pg_1",7.199999999999999,heuristic
+7,FinCEN 114,2.4,heuristic,"FinCEN_114_Report_of_Foreign_Bank_and_Financial_Accounts,_Pg_2",12.0,heuristic
+8,FinCEN 114,2.4,heuristic,"FinCEN_114_Report_of_Foreign_Bank_and_Financial_Accounts,_Pg_3",12.0,heuristic
+9,FinCEN 114,2.4,heuristic,"FinCEN_114_Report_of_Foreign_Bank_and_Financial_Accounts,_Pg_5",9.2,heuristic
+10,FinCEN 114,2.4,heuristic,"FinCEN_114_Report_of_Foreign_Bank_and_Financial_Accounts,_Pg_1",7.199999999999999,heuristic
+11,FinCEN 114,2.4,heuristic,"FinCEN_114_Report_of_Foreign_Bank_and_Financial_Accounts,_Pg_2",12.0,heuristic
+12,FinCEN 114,2.4,heuristic,"FinCEN_114_Report_of_Foreign_Bank_and_Financial_Accounts,_Pg_3",12.0,heuristic
+13,FinCEN 114,2.4,heuristic,"FinCEN_114_Report_of_Foreign_Bank_and_Financial_Accounts,_Pg_5",9.2,heuristic
+14,Other,0.0,heuristic,Other,1.0,heuristic
+15,Other,0.0,heuristic,Other,0.0,heuristic
+16,Other,0.0,heuristic,Filing_Instructions,7.199999999999999,heuristic
+17,Other,0.0,heuristic,Other,0.0,heuristic
+18,1040,8.399999999999999,heuristic,1040_Main_Pg1,4.4,heuristic
+19,1040,3.5999999999999996,heuristic,1040_Main_Pg2,4.8,heuristic
+20,1040,3.2,heuristic,1040_Schedule_1,4.8,heuristic
+21,1040,4.4,heuristic,1040_Schedule_A,6.0,heuristic
+22,1040,5.6,heuristic,1040_Schedule_C,4.8,heuristic
+23,1040,4.4,heuristic,1040_Schedule_E,4.8,heuristic
+24,1040,7.199999999999999,heuristic,1040_Schedule_E_PG_2,2.0,heuristic
+25,1040,5.6,heuristic,1040_Schedule_F,6.3,heuristic
+26,Form 5329,3.5999999999999996,heuristic,Form_5329_Pg_1,3.5999999999999996,heuristic
+27,Form 5329,2.4,heuristic,Form_5329_Pg_2,4.8,heuristic
+28,Form 5329,2.4,heuristic,Form_5329_Pg_3,2.4,heuristic
+29,Form 6251,13.2,heuristic,Form_6251,12.0,heuristic
+30,Form 6252,6.0,heuristic,Form_6252,12.0,heuristic
+31,Form 6252,6.0,heuristic,Form_6252,12.0,heuristic
+32,Form 6252,6.0,heuristic,Form_6252,12.0,heuristic
+33,Form 6252,6.0,heuristic,Form_6252,12.0,heuristic
+34,Form 6252,6.0,heuristic,Form_6252,12.0,heuristic
+35,Form 6252,6.0,heuristic,Form_6252,12.0,heuristic
+36,Form 6252,6.0,heuristic,Form_6252,12.0,heuristic
+37,Other,0.0,heuristic,Other,0.0,heuristic
+38,Other,0.0,heuristic,Other,0.0,heuristic
+39,Form 8582,6.0,heuristic,Form_8582_Pg_1,7.199999999999999,heuristic
+40,Form 8582,3.5999999999999996,heuristic,Form_8582_Pg_2,9.2,heuristic
+41,Form 8582,6.0,heuristic,Form_8582_Pg_1,7.199999999999999,heuristic
+42,Form 8582,3.5999999999999996,heuristic,Form_8582_Pg_2,9.2,heuristic
+43,Form 6252,2.4,heuristic,Federal_Statements_Form_6252_Line_29e,15.599999999999998,heuristic
+44,Form 6252,2.4,heuristic,Federal_Statements_Form_6252_Line_29e,15.599999999999998,heuristic
