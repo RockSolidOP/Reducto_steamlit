@@ -19,14 +19,11 @@ from __future__ import annotations
 import json, re, argparse, os, unicodedata, csv
 from pathlib import Path
 from typing import Dict, List, Tuple, Any
-
-try:
-    import fitz  # PyMuPDF
-except Exception as e:
-    raise RuntimeError("PyMuPDF (fitz) is required. pip install pymupdf") from e
+import fitz # PyMuPDF
 
 
 def _norm(s: str) -> str:
+    """Normalize text: NFKC + fix dashes + collapse whitespace."""
     s = unicodedata.normalize("NFKC", s or "")
     s = s.replace("\u2014", "-").replace("\u2013", "-")
     s = re.sub(r"\s+", " ", s)
@@ -34,6 +31,7 @@ def _norm(s: str) -> str:
 
 
 def extract_sections(page: "fitz.Page") -> Dict[str, str]:
+    """Return header/body/footer text using simple Y-cut thresholds."""
     body_raw = page.get_text("text") or ""
     body = _norm(body_raw)
     try:
@@ -63,6 +61,7 @@ def extract_sections(page: "fitz.Page") -> Dict[str, str]:
 
 
 def _compile_list(value: Any) -> List[Tuple[re.Pattern, float]]:
+    """Compile regex specs (str or {re,w}) into (pattern, weight) tuples."""
     out: List[Tuple[re.Pattern, float]] = []
     for entry in value or []:
         if isinstance(entry, str):
@@ -105,7 +104,8 @@ def compile_rules(items: List[Dict]) -> Dict[str, Dict[str, Any]]:
     return out
 
 
-def score_items(texts: List[Tuple[str, float]], rules: Dict[str, Dict[str, Any]]) -> Tuple[str | None, float, Dict[str, float]]:
+def score_items(texts: List[Tuple[str, float]], rules: Dict[str, Dict[str, Any]]) -> str | None:
+    """Pick best rule name via weighted regex matches; no scores returned."""
     scores: Dict[str, float] = {}
     for name, rule in rules.items():
         pos: List[Tuple[re.Pattern, float]] = rule.get("pos", [])
@@ -140,12 +140,13 @@ def score_items(texts: List[Tuple[str, float]], rules: Dict[str, Dict[str, Any]]
             scores[name] = total
 
     if not scores:
-        return None, 0.0, {}
+        return None
     best = sorted(scores.items(), key=lambda kv: (-kv[1], kv[0]))[0]
-    return best[0], best[1], scores
+    return best[0]
 
 
 def apply_smoothing(rows: List[dict]) -> None:
+    """Assign Pg1/Pg2/etc. by page order for common multi-page forms."""
     by_family: Dict[str, List[int]] = {}
     for i, r in enumerate(rows):
         fam = r.get("predicted_family") or ""
@@ -265,8 +266,7 @@ def main():
             ]
 
             # Stage 1: family
-            fam, fam_score, fam_scores = score_items(texts, fam_rules)
-            fam_method = "heuristic"
+            fam = score_items(texts, fam_rules)
 
             # Stage 2: labels restricted by family (allow neutrals always)
             if fam is None:
@@ -276,7 +276,7 @@ def main():
             else:
                 allowed_labels = sorted({l for l in labels if family_of_label.get(l) == fam} | neutral_labels)
             allowed_label_rules = {k: v for k, v in lbl_rules.items() if k in allowed_labels}
-            lbl, lbl_score, lbl_scores = score_items(texts, allowed_label_rules)
+            lbl = score_items(texts, allowed_label_rules)
             if lbl is None:
                 lbl = "Other"
 
@@ -284,8 +284,6 @@ def main():
                 print(f"--- DEBUG Page {page_num}")
                 print("Header:", sections.get("header", "")[:220])
                 print("Footer:", sections.get("footer", "")[:220])
-                print("Family scores:", json.dumps(fam_scores, indent=2))
-                print("Label scores:", json.dumps(lbl_scores, indent=2))
 
             # Normalize predicted label format (e.g., 'Form 8582 Pg 2' -> 'Form_8582_Pg_2')
             def norm_label_name(s: str) -> str:
@@ -298,11 +296,7 @@ def main():
             rows.append({
                 "page": page_num,
                 "predicted_family": fam,
-                "family_confidence": float(fam_score),
-                "family_method": fam_method,
                 "predicted_label": norm_label_name(lbl),
-                "confidence": float(lbl_score),
-                "method": "heuristic",
             })
 
     if smoothing_enabled:
@@ -310,18 +304,7 @@ def main():
 
     out_path = Path(args.out)
     with open(out_path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(
-            f,
-            fieldnames=[
-                "page",
-                "predicted_family",
-                "family_confidence",
-                "family_method",
-                "predicted_label",
-                "confidence",
-                "method",
-            ],
-        )
+        writer = csv.DictWriter(f, fieldnames=["page", "predicted_family", "predicted_label"])
         writer.writeheader()
         writer.writerows(rows)
     print(f"Wrote {len(rows)} rows to {out_path}")

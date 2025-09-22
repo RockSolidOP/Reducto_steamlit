@@ -22,28 +22,12 @@ import fitz  # PyMuPDF
 # ------------------------------
 
 def get_default_config_path() -> Path:
-    """Return default config path matching the CLI classifier when present.
+    """Return the single canonical classifier config path (absolute).
 
-    Preference order:
-    1) testing_files/reducto_files/classifyV2/forms_config.json (keeps GUI consistent
-       with the CLI run you use during testing)
-    2) app/resources/classifyier_regex/forms_config.json
-    3) app/resources/forms_config.json
+    Per request, always use:
+    /Users/aaditya/Documents/Projects/Reducto_steamlit/app/resources/classifyier_regex/forms_config.json
     """
-    # Try the test script's config first (if repository includes testing_files)
-    project_root = Path(__file__).resolve().parents[2]
-    cli_cfg = project_root / "testing_files" / "reducto_files" / "classifyV2" / "forms_config.json"
-    if cli_cfg.exists():
-        return cli_cfg
-
-    # Then prefer the app-bundled classifier regex config
-    resources = Path(__file__).resolve().parents[1] / "resources"
-    prefer = resources / "classifyier_regex" / "forms_config.json"
-    if prefer.exists():
-        return prefer
-
-    # Fallback legacy location
-    return resources / "forms_config.json"
+    return Path("/Users/aaditya/Documents/Projects/Reducto_steamlit/app/resources/classifyier_regex/forms_config.json")
 
 
 def load_config(config_path: str | Path | None = None) -> Dict[str, Any]:

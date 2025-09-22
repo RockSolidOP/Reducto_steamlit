@@ -224,15 +224,15 @@ class ReductoTab:
 
         # --- Schema Extract tab (no preprocessors) ---
         with tab_schema:
-            # Discover schemas from both the canonical test folder and a local editable folder
-            local_schema_dir = Path("reducto_schema")
+            # Discover schemas from app-bundled resources folder
+            resources_dir = Path(__file__).resolve().parents[1] / "resources" / "reducto_schema"
             try:
-                local_schema_dir.mkdir(parents=True, exist_ok=True)
+                resources_dir.mkdir(parents=True, exist_ok=True)
             except Exception:
                 pass
 
             # Upload new schema
-            st.markdown("#### Manage Schemas")
+            st.markdown("#### Manage Schemas (resources/reducto_schema)")
             up_col1, up_col2 = st.columns([2, 1])
             with up_col1:
                 uploaded_schema = st.file_uploader("Upload JSON schema", type=["json"], key="schema_uploader")
@@ -245,13 +245,13 @@ class ReductoTab:
                     target_name = Path(uploaded_schema.name).name
                     if not target_name.lower().endswith(".json"):
                         target_name += ".json"
-                    target_path = local_schema_dir / target_name
+                    target_path = resources_dir / target_name
                     if target_path.exists() and not overwrite_upload:
                         base = target_path.stem
                         suffix = target_path.suffix
                         i = 1
                         while True:
-                            alt = local_schema_dir / f"{base}_{i}{suffix}"
+                            alt = resources_dir / f"{base}_{i}{suffix}"
                             if not alt.exists():
                                 target_path = alt
                                 break
@@ -264,8 +264,8 @@ class ReductoTab:
                     st.error(f"Upload failed: {e}")
 
             # Refresh list after possible upload
-            schema_paths = sorted(local_schema_dir.glob("*.json")) if local_schema_dir.exists() else []
-            labels = [f"{p.parent.name}/{p.name}" for p in schema_paths]
+            schema_paths = sorted(resources_dir.glob("*.json")) if resources_dir.exists() else []
+            labels = [f"{p.name}" for p in schema_paths]
 
             # Persist selection
             default_idx = 0
@@ -278,13 +278,23 @@ class ReductoTab:
                 except Exception:
                     default_idx = 0
             sel = st.selectbox(
-                "Choose schema (from reducto_schema)",
+                "Choose schema (from resources)",
                 options=list(range(len(labels))) if labels else [],
                 format_func=lambda i: labels[i] if labels else "",
                 index=min(default_idx, max(0, len(labels) - 1)) if labels else 0,
                 key="schema_select_index",
             )
-            selected_schema_path: Path | None = schema_paths[sel] if labels else None
+            # Robust selection: if sel is None or out-of-range, fall back to 0
+            if labels:
+                try:
+                    sel_idx = int(sel) if sel is not None else 0
+                    if not (0 <= sel_idx < len(schema_paths)):
+                        sel_idx = 0
+                    selected_schema_path: Path | None = schema_paths[sel_idx]
+                except Exception:
+                    selected_schema_path = schema_paths[0]
+            else:
+                selected_schema_path = None
             if selected_schema_path is not None:
                 st.session_state["selected_schema_path"] = str(selected_schema_path)
 

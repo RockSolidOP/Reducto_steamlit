@@ -11,6 +11,7 @@ from app.state.session import get_state
 from app.ui.azure_tab import AzureTab, render_cost_estimator
 from app.ui.pymupdf_tab import PyMuPDFTab, run_results as run_pymupdf
 from app.ui.reducto_tab import ReductoTab, run_results as run_reducto
+from app.ui.classify_tab import ClassifyTab
 from app.ui.debug import debug_panel
 from app.ui.components import file_uploader
 from app.utils.pdf_preview import render_pdf_page_png_bytes
@@ -104,7 +105,7 @@ def run() -> None:
     render_cost_estimator(page_count=page_count, current_page=int(page_number))
 
     # Tabs registry
-    registry = [ReductoTab(), AzureTab(), PyMuPDFTab()]
+    registry = [ClassifyTab(), ReductoTab(), AzureTab(), PyMuPDFTab()]
     tab_names = [t.name for t in registry]
     ctxs = st.tabs(tab_names)
     for t, ctx in zip(registry, ctxs):

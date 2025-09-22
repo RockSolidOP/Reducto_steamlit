@@ -1,0 +1,720 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IRS Form 1040 (2024) — Extraction Schema (page‑agnostic, v3)",
+  "type": "object",
+  "additionalProperties": false,
+  "description": "Extract exactly what is PRINTED on IRS Form 1040 (2024). Do not compute, infer, normalize, cross-fill from other pages/schedules, or repair values. When a value is blank/absent/unreadable, return null (not 0/false/\"\"). Numbers: strip '$' and commas; parentheses indicate negative (e.g., '(1,234)' → -1234). Checkboxes are tri-state: true (clearly checked), false (clearly present but unchecked), null (missing/ambiguous). This schema is page‑agnostic: match by printed labels and line numbers (e.g., 'Line 1a').",
+  "x-guidance": {
+    "page_agnostic": true,
+    "anchoring": "Prefer official line numbers and nearby label phrases; ignore PDF page numbers/coordinates.",
+    "missing_values": "Use null for blanks, dashes (—), 'N/A', unreadable/cropped areas.",
+    "masked_ids": "Accept masked SSNs (e.g., 'XXX-XX-1234').",
+    "totals": "Do NOT recompute totals; copy printed totals only.",
+    "lists": "Use arrays for multi-row tables; preserve top-to-bottom order; omit entirely blank rows."
+  },
+  "properties": {
+    "form_name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Form 1040",
+        null
+      ],
+      "description": "Form title anchor — literal text 'Form 1040' near the main header. Null if the title is cropped or not visible."
+    },
+    "tax_year": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "enum": [
+        2024,
+        null
+      ],
+      "description": "Printed year associated with 'U.S. Individual Income Tax Return'. If multiple years appear (e.g., watermark), choose the bold/primary title year; otherwise null."
+    },
+    "filing_status": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Single",
+        "Married filing jointly",
+        "Married filing separately",
+        "Head of household",
+        "Qualifying surviving spouse",
+        null
+      ],
+      "description": "Group labeled 'Filing Status'. Return the label of the single clearly checked option. If more than one looks checked or the mark is ambiguous, return null."
+    },
+    "presidential_election_campaign": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Checkboxes labeled '$3 to this fund' for 'you' and (if printed) 'spouse'. Tri-state handling.",
+      "properties": {
+        "you": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Your '$3 to this fund' checkbox."
+        },
+        "spouse": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Spouse '$3 to this fund' checkbox if the spouse block is present."
+        }
+      }
+    },
+    "taxpayer": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Primary filer identity block — copy text exactly as printed in labeled fields; do not infer from elsewhere.",
+      "properties": {
+        "first_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Given name as printed; keep accents/hyphens/case."
+        },
+        "middle_initial": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 1,
+          "description": "Single letter if present; null if blank."
+        },
+        "last_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Surname as printed."
+        },
+        "ssn": {
+          "$ref": "#/$defs/ssn_nullable"
+        },
+        "born_before_1960": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Checkbox text 'Were born before January 2, 1960'. Tri-state."
+        },
+        "blind": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Checkbox text 'Are blind'. Tri-state."
+        },
+        "can_be_claimed_as_dependent": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Standard deduction area 'Someone can claim: You'. Tri-state."
+        }
+      }
+    },
+    "spouse": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Spouse identity block when present — copy text exactly as printed in labeled fields.",
+      "properties": {
+        "first_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "As printed."
+        },
+        "middle_initial": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 1,
+          "description": "As printed; nullable."
+        },
+        "last_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "As printed."
+        },
+        "ssn": {
+          "$ref": "#/$defs/ssn_nullable"
+        },
+        "born_before_1960": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Checkbox 'Were born before January 2, 1960'. Tri-state."
+        },
+        "blind": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Checkbox 'Are blind'. Tri-state."
+        },
+        "can_be_claimed_as_dependent": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Standard deduction area 'Spouse'. Tri-state."
+        },
+        "spouse_itemizes_or_dual_status": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Checkbox text 'Spouse itemizes on a separate return or you were a dual-status alien'. Tri-state."
+        }
+      }
+    },
+    "address": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Mailing address block — do not normalize or split/merge fields; copy as printed.",
+      "properties": {
+        "street": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Line labeled 'Home address (number and street)'; include P.O. Box if printed here."
+        },
+        "apt_no": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "If a distinct 'Apt. no.' field is printed; else null."
+        },
+        "city": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "City/town as printed."
+        },
+        "state": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 2,
+          "maxLength": 2,
+          "description": "2‑letter USPS code as printed. Null for foreign addresses."
+        },
+        "zip": {
+          "$ref": "#/$defs/zip_nullable"
+        },
+        "foreign": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Populate only when the foreign-address layout is shown.",
+          "properties": {
+            "country": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Country name as printed (do not ISO‑code)."
+            },
+            "province_state_county": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Region/Province/County as printed."
+            },
+            "postal_code": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Foreign postal code as printed."
+            }
+          }
+        }
+      }
+    },
+    "digital_assets_question": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "Yes",
+        "No",
+        null
+      ],
+      "description": "Yes/No question containing the phrase 'digital assets'. Return the selected label; null if ambiguous or not present."
+    },
+    "dependents": {
+      "type": "array",
+      "description": "Grid labeled 'Dependents'. Preserve top‑to‑bottom row order. Omit entirely blank rows.",
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "first_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "As printed."
+          },
+          "last_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "As printed."
+          },
+          "ssn": {
+            "$ref": "#/$defs/ssn_nullable",
+            "description": "SSN/ITIN/ATIN as printed; allow masked last‑4 (e.g., 'XXX-XX-1234')."
+          },
+          "relationship": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Relationship text as printed (e.g., 'Son', 'Daughter')."
+          },
+          "eligible_child_tax_credit": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Checkbox column 'child tax credit'. Tri-state."
+          },
+          "eligible_other_dependents_credit": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Checkbox column 'credit for other dependents'. Tri-state."
+          }
+        }
+      }
+    },
+    "income_and_adjustments": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Lines 1–15. NUMBERS ONLY. Strip '$' and commas; parentheses → negative; blanks/—/N/A → null. Do not recompute totals; copy printed values only.",
+      "properties": {
+        "line_1a_wages": {
+          "$ref": "#/$defs/money_nullable",
+          "description": "Label anchor '1a Wages, salaries, tips'."
+        },
+        "line_1b_household_employee_wages": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_1c_tip_income_not_reported": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_1d_medicaid_waiver_payments": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_1e_adoption_benefits": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_1f_wages_from_form_8919": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_1g_other_earned_income": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_1h_nontaxable_combat_pay_election": {
+          "$ref": "#/$defs/money_nullable",
+          "description": "Only if a numeric amount is printed with this label; a lone checkbox without an amount → null."
+        },
+        "line_1z_total_wages_and_other": {
+          "$ref": "#/$defs/money_nullable",
+          "description": "Total for line 1; do NOT recompute."
+        },
+        "line_2a_tax_exempt_interest": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_2b_taxable_interest": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_3a_qualified_dividends": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_3b_ordinary_dividends": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_4a_ira_distributions_total": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_4b_ira_distributions_taxable": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_5a_pensions_annuities_total": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_5b_pensions_annuities_taxable": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_6a_social_security_benefits_total": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_6b_social_security_benefits_taxable": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_7_capital_gain_or_loss": {
+          "$ref": "#/$defs/money_nullable",
+          "description": "If the area shows 'See Schedule D' without a number on this form, return null."
+        },
+        "line_8_other_income_sched1_line10": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_9_total_income": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_10_adjustments_sched1_line26": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_11_adjusted_gross_income": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_12_standard_or_itemized_deductions": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_13_qbi_deduction_from_8995_or_8995A": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_14_add_lines_12_and_13": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_15_taxable_income": {
+          "$ref": "#/$defs/money_nullable"
+        }
+      }
+    },
+    "tax_and_credits": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Lines 16–24. Use printed amounts only; if a line references another schedule and no number is printed on 1040, return null.",
+      "properties": {
+        "line_16_tax": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_17_schedule2_line3": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_18_add_lines_16_and_17": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_19_child_tax_credit_or_other_dependents_sched8812": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_20_amount_from_schedule3_line8": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_21_add_lines_19_and_20": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_22_subtract_line_21_from_line_18": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_23_other_taxes_schedule2_line21": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_24_total_tax": {
+          "$ref": "#/$defs/money_nullable"
+        }
+      }
+    },
+    "payments_and_refundable_credits": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Lines 25–33.",
+      "properties": {
+        "line_25a_fed_income_tax_withheld_w2": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_25b_fed_income_tax_withheld_1099": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_25c_fed_income_tax_withheld_other": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_25d_total_fed_income_tax_withheld": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_26_2024_estimated_payments_and_2023_applied": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_27_earned_income_credit_eic": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_28_additional_child_tax_credit_sched8812": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_29_american_opportunity_credit_form8863_line8": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_31_amount_from_schedule3_line15": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_32_total_other_payments_and_refundable_credits": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_33_total_payments": {
+          "$ref": "#/$defs/money_nullable"
+        }
+      }
+    },
+    "refund": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Lines 34–36. Only populate direct deposit details when routing/account numbers are printed.",
+      "properties": {
+        "line_34_overpaid": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_35a_amount_to_be_refunded": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_35a_form_8888_attached": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Indication that Form 8888 is attached. Tri-state."
+        },
+        "direct_deposit": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "routing_number": {
+              "$ref": "#/$defs/routing_number_nullable"
+            },
+            "account_number": {
+              "$ref": "#/$defs/account_number_nullable"
+            },
+            "account_type": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "enum": [
+                "Checking",
+                "Savings",
+                null
+              ],
+              "description": "Return the printed selection; null if not specified."
+            }
+          }
+        },
+        "line_36_amount_applied_to_2025_estimated_tax": {
+          "$ref": "#/$defs/money_nullable"
+        }
+      }
+    },
+    "amount_you_owe": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Lines 37–38.",
+      "properties": {
+        "line_37_amount_you_owe": {
+          "$ref": "#/$defs/money_nullable"
+        },
+        "line_38_estimated_tax_penalty": {
+          "$ref": "#/$defs/money_nullable"
+        }
+      }
+    },
+    "signature_and_other_info": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Blocks titled 'Sign Here', 'Third Party Designee', and 'Paid Preparer Use Only'. Do not synthesize contact info from elsewhere.",
+      "properties": {
+        "your_occupation": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "As printed."
+        },
+        "spouse_occupation": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "As printed."
+        },
+        "phone": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Copy exactly as printed, including punctuation/formatting; do not normalize."
+        },
+        "email": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "As printed; do not repair/guess."
+        },
+        "identity_protection_pin_primary": {
+          "$ref": "#/$defs/ip_pin_nullable"
+        },
+        "identity_protection_pin_spouse": {
+          "$ref": "#/$defs/ip_pin_nullable"
+        },
+        "third_party_designee": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Authorization block: true if a designee is clearly indicated; false if clearly 'No'; null if absent/unclear."
+        },
+        "third_party_designee_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "As printed."
+        },
+        "third_party_phone": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "As printed."
+        },
+        "third_party_pin": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^\\d{5}$",
+          "description": "5 digits if printed; null if blank."
+        },
+        "paid_preparer_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "As printed."
+        },
+        "paid_preparer_ptin": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "As printed."
+        },
+        "paid_preparer_self_employed": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "Checkbox 'Self‑employed'. Tri-state."
+        },
+        "paid_preparer_firm_name": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "As printed."
+        },
+        "paid_preparer_firm_ein": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "As printed."
+        },
+        "paid_preparer_firm_address": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "As printed."
+        },
+        "paid_preparer_phone": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "As printed."
+        }
+      }
+    }
+  },
+  "required": [
+    "form_name",
+    "tax_year"
+  ],
+  "$defs": {
+    "money_nullable": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "description": "USD numeric ONLY (no '$' or commas). Parentheses → negative. Examples: '$1,234' → 1234; '(2,050)' → -2050; blanks/—/N/A → null."
+    },
+    "ssn_nullable": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^(\\d{3}-\\d{2}-\\d{4}|XXX-XX-\\d{4}|\\*\\*\\*-\\*\\*-\\d{4})$",
+      "description": "SSN/ITIN/ATIN as printed. Masked last‑4 formats allowed (e.g., 'XXX-XX-1234'). Null if missing."
+    },
+    "zip_nullable": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^\\d{5}(-\\d{4})?$",
+      "description": "ZIP or ZIP+4 as printed; null for foreign addresses."
+    },
+    "ip_pin_nullable": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^\\d{6}$",
+      "description": "6‑digit IP PIN if printed; null if blank."
+    },
+    "routing_number_nullable": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^\\d{9}$",
+      "description": "9 digits; ignore spaces/dashes visually (return digits only). Null if not present."
+    },
+    "account_number_nullable": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 4,
+      "maxLength": 17,
+      "description": "Account number exactly as printed (no padding/truncation). Null if not present."
+    }
+  }
+}
