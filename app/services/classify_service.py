@@ -22,12 +22,13 @@ import fitz  # PyMuPDF
 # ------------------------------
 
 def get_default_config_path() -> Path:
-    """Return the single canonical classifier config path (absolute).
+    """Return the app-bundled classifier config path (absolute, cross-platform).
 
-    Per request, always use:
-    /Users/aaditya/Documents/Projects/Reducto_steamlit/app/resources/classifyier_regex/forms_config.json
+    Resolved relative to this file so it works regardless of CWD or OS:
+    app/services/classify_service.py -> app/resources/classifyier_regex/forms_config.json
     """
-    return Path("/Users/aaditya/Documents/Projects/Reducto_steamlit/app/resources/classifyier_regex/forms_config.json")
+    app_dir = Path(__file__).resolve().parents[1]  # .../app
+    return app_dir / "resources" / "classifyier_regex" / "forms_config.json"
 
 
 def load_config(config_path: str | Path | None = None) -> Dict[str, Any]:
