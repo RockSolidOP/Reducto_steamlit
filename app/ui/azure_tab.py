@@ -18,7 +18,6 @@ from app.services.azure_service import (
     parse_with_azure,
     parse_with_azure_docint,
     azure_to_dict,
-    azure_kv_to_dict,
     azure_fields_to_dict,
 )
 
@@ -102,21 +101,11 @@ def render_azure_outputs(result: object, page_number: int, *, label_prefix: str 
             mime="application/json",
         )
     with colB:
-        st.markdown(f"#### {label_prefix} Key-Values / Fields")
-        kv_t0 = perf_counter()
-        kv_dict = azure_kv_to_dict(result)
+        st.markdown(f"#### {label_prefix} Document Fields")
+        t0 = perf_counter()
         fields_dict = azure_fields_to_dict(result)
-        post_secs = perf_counter() - kv_t0
+        post_secs = perf_counter() - t0
         st.caption(f"Post-processing time: {fmt_duration(post_secs)}")
-        st.markdown("- Key-Value Pairs")
-        st.json(kv_dict)
-        st.download_button(
-            f"Download {label_prefix.lower()}_kv.json",
-            data=json.dumps(kv_dict, ensure_ascii=False, indent=2),
-            file_name=f"{label_prefix.lower()}_kv_page{int(page_number)}.json",
-            mime="application/json",
-        )
-        st.markdown("- Document Fields")
         st.json(fields_dict)
         st.download_button(
             f"Download {label_prefix.lower()}_fields.json",
@@ -185,7 +174,12 @@ class AzureTab:
         with tab_1040:
             st.markdown("### Azure 1040 (prebuilt)")
             default_model_1040 = AZURE_CONFIG.get("model_id_1040", "prebuilt-tax.us.1040")
-            known_tax_models = ["prebuilt-tax.us.1040", "Custom…"]
+            # Include Schedule 1 as a selectable built-in option
+            known_tax_models = [
+                "prebuilt-tax.us.1040",
+                AZURE_CONFIG.get("model_id_1040_schedule1", "prebuilt-tax.us.1040Schedule1"),
+                "Custom…",
+            ]
             prev_model = state.azure_1040_model or default_model_1040
             initial_choice = prev_model if prev_model in known_tax_models else "Custom…"
             choice = st.selectbox(
@@ -221,17 +215,52 @@ class AzureTab:
                 state.azure_1040_model = model_1040
                 state.azure_1040_pages = pages_1040
                 try:
+                    # Validate pages spec against document bounds (no fallback)
+                    page_count = int(st.session_state.get("page_count_ui", 1))
+                    pages_for_azure: str | None = None
                     if pages_1040.strip():
-                        st.warning(
-                            f"Using static pages override '{pages_1040.strip()}', ignoring selected page."
-                        )
+                        spec = pages_1040.strip()
+                        # Remove whitespace around commas
+                        cleaned = ",".join(part.strip() for part in spec.split(",") if part.strip())
+                        pages_set: set[int] = set()
+                        invalid = False
+                        for part in cleaned.split(","):
+                            if not part:
+                                continue
+                            if "-" in part:
+                                a, b = part.split("-", 1)
+                                try:
+                                    start = int(a)
+                                    end = int(b)
+                                except ValueError:
+                                    invalid = True
+                                    break
+                                # Normalize start<=end for validation
+                                if end < start:
+                                    start, end = end, start
+                                for i in range(start, end + 1):
+                                    pages_set.add(i)
+                            else:
+                                try:
+                                    pages_set.add(int(part))
+                                except ValueError:
+                                    invalid = True
+                                    break
+                        # Range check
+                        if invalid or not pages_set:
+                            st.error("Invalid pages specification.")
+                            return
+                        if min(pages_set) < 1 or max(pages_set) > page_count:
+                            st.error("Pages out of range for this document.")
+                            return
+                        pages_for_azure = cleaned
                     with st.status("Analyzing with Azure 1040 prebuilt model…", expanded=False):
                         try:
                             result, secs, model_used, pages_used = run_azure_analysis(
                                 Path(st.session_state.get("pdf_path")),
                                 int(st.session_state.get("page_number_ui", 1)),
                                 model_id=model_1040,
-                                pages=pages_1040.strip() or None,
+                                pages=pages_for_azure,
                                 prefer_docint=True,
                             )
                         except Exception as e:
@@ -241,7 +270,7 @@ class AzureTab:
                                     Path(st.session_state.get("pdf_path")),
                                     int(st.session_state.get("page_number_ui", 1)),
                                     model_id=fallback_model,
-                                    pages=pages_1040.strip() or None,
+                                    pages=pages_for_azure,
                                     prefer_docint=True,
                                 )
                                 st.info(f"Fell back to model: {fallback_model}")

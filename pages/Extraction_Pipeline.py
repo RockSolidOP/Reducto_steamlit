@@ -31,7 +31,7 @@ try:  # noqa: SIM105 - deliberate try/except import shim
     from app.services.azure_service import (
         parse_with_azure,
         parse_with_azure_docint,
-        azure_kv_to_dict,
+        azure_fields_to_dict,
     )
     from app.services.classify_service import (
         get_default_config_path,
@@ -49,7 +49,7 @@ except ModuleNotFoundError:  # Running via `streamlit run pages/Extraction_Pipel
     from app.services.azure_service import (
         parse_with_azure,
         parse_with_azure_docint,
-        azure_kv_to_dict,
+        azure_fields_to_dict,
     )
     from app.services.classify_service import (
         get_default_config_path,
@@ -139,8 +139,11 @@ def _select_model_for_page(label: str, family: str | None) -> Optional[str]:
     Extend this mapping as new form types are supported.
     """
     fam = (family or _infer_family(label)).strip()
-    if fam == "1040" and label in ("1040_Main_Pg1", "1040_Main_Pg2"):
-        return AZURE_CONFIG.get("model_id_1040", "prebuilt-tax.us.1040")
+    if fam == "1040":
+        if label in ("1040_Main_Pg1", "1040_Main_Pg2"):
+            return AZURE_CONFIG.get("model_id_1040", "prebuilt-tax.us.1040")
+        if label == "1040_Schedule_1":
+            return AZURE_CONFIG.get("model_id_1040_schedule1", "prebuilt-tax.us.1040Schedule1")
     return None
 
 
@@ -174,10 +177,13 @@ def _build_plan_1040(classified: List[ClassifiedPage]) -> Tuple[List[AzureJob], 
     file_name = classified[0].file_name if classified else "file.pdf"
     model_id = AZURE_CONFIG.get("model_id_1040", "prebuilt-tax.us.1040")
 
-    # Separate 1040 main pages from others
+    # Separate 1040 main pages and Schedule 1 from others
     p1_pages: List[int] = [c.page for c in classified if c.label == "1040_Main_Pg1"]
     p2_pages: List[int] = [c.page for c in classified if c.label == "1040_Main_Pg2"]
-    other_pages: List[ClassifiedPage] = [c for c in classified if c.label not in ("1040_Main_Pg1", "1040_Main_Pg2")]
+    sch1_pages: List[int] = [c.page for c in classified if c.label == "1040_Schedule_1"]
+    other_pages: List[ClassifiedPage] = [
+        c for c in classified if c.label not in ("1040_Main_Pg1", "1040_Main_Pg2", "1040_Schedule_1")
+    ]
 
     p1_pages_sorted = sorted(p1_pages)
     p2_pages_sorted = sorted(p2_pages)
@@ -244,6 +250,20 @@ def _build_plan_1040(classified: List[ClassifiedPage]) -> Tuple[List[AzureJob], 
         )
         page_plan.append(PagePlan(page=p, label="1040_Main_Pg2", status="single_page_only", pair_number=pair_number, group_id=group_id, job_id=job_id, action="analyze", model_id=model_id))
 
+    # 1040 Schedule 1: create single-page jobs using schedule 1 model
+    if sch1_pages:
+        model_id_sch1 = AZURE_CONFIG.get("model_id_1040_schedule1", "prebuilt-tax.us.1040Schedule1")
+        for p in sorted(sch1_pages):
+            pair_number += 1
+            group_id = f"{file_name}#1040_SCH1#{pair_number}({p})"
+            job_id = group_id
+            azure_jobs.append(
+                AzureJob(job_id=job_id, file_name=file_name, model_id=model_id_sch1, pages=str(p), reason="1040 Schedule 1"),
+            )
+            page_plan.append(
+                PagePlan(page=p, label="1040_Schedule_1", status="schedule1", pair_number=pair_number, group_id=group_id, job_id=job_id, action="analyze", model_id=model_id_sch1)
+            )
+
     # Non‑1040 pages: skip
     for c in other_pages:
         page_plan.append(PagePlan(page=c.page, label=c.label, status="non_1040", pair_number=None, group_id=None, job_id=None, action="skip", model_id=_select_model_for_page(c.label, c.family)))
@@ -266,14 +286,21 @@ def _compose_output(
     # Index classification per page
     by_page: Dict[int, ClassifiedPage] = {c.page: c for c in classified}
 
-    # Map job_id -> fields (kv dict) or error
+    # Map job_id -> fields (document.fields dict) or error
     job_fields: Dict[str, Dict[str, Any]] = {}
     job_errors: Dict[str, str] = {}
     for jid, payload in azure_results.items():
         ok = bool(payload.get("ok"))
         if ok:
             res = payload.get("result")
-            job_fields[jid] = azure_kv_to_dict(res)
+            fields_obj = azure_fields_to_dict(res)
+            # Ensure a dict for consistency; if list returned (multi-doc), wrap
+            if isinstance(fields_obj, list):
+                job_fields[jid] = {"documents": fields_obj}
+            elif isinstance(fields_obj, dict):
+                job_fields[jid] = fields_obj
+            else:
+                job_fields[jid] = {}
         else:
             job_errors[jid] = str(payload.get("error") or "")
 
@@ -298,14 +325,11 @@ def _compose_output(
         azure_fields: Dict[str, Any] = {}
         error: Optional[str] = None
         if pp.action == "analyze" and azure_model:
-            if pp.status == "paired":
+            if pp.status in ("paired", "schedule1"):
                 if pp.job_id in job_fields:
                     azure_fields = job_fields.get(pp.job_id, {})
-                if pp.job_id in job_errors:
-                    error = job_errors.get(pp.job_id)
-            else:  # single_page_only — call Azure happened but keep fields empty by policy
-                if pp.job_id in job_errors:
-                    error = job_errors.get(pp.job_id)
+            if pp.job_id in job_errors:
+                error = job_errors.get(pp.job_id)
 
         pages_out.append(
             {
@@ -445,7 +469,12 @@ def run() -> None:
                 "if_family": "1040",
                 "labels": ["1040_Main_Pg1", "1040_Main_Pg2"],
                 "model": AZURE_CONFIG.get("model_id_1040", "prebuilt-tax.us.1040"),
-            }
+            },
+            {
+                "if_family": "1040",
+                "labels": ["1040_Schedule_1"],
+                "model": AZURE_CONFIG.get("model_id_1040_schedule1", "prebuilt-tax.us.1040Schedule1"),
+            },
         ]
     }
     with st.expander("Details: page plan and model policy", expanded=False):

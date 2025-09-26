@@ -42,6 +42,8 @@ AZURE_CONFIG = {
     "model_id": "prebuilt-document",
     # Prebuilt model for US IRS Form 1040 (if available in your region)
     "model_id_1040": "prebuilt-tax.us.1040",
+    # Prebuilt model for US IRS Form 1040 Schedule 1
+    "model_id_1040_schedule1": "prebuilt-tax.us.1040Schedule1",
 }
 
 
