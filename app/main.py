@@ -99,7 +99,7 @@ def run() -> None:
     png_bytes = render_pdf_page_png_bytes(pdf_path, int(page_number), zoom=2.0)
     with col_right:
         st.subheader(f"PDF Preview — Page {int(page_number)}")
-        st.image(png_bytes, caption=f"Page {int(page_number)}", use_container_width=True)
+        st.image(png_bytes, caption=f"Page {int(page_number)}", width='stretch')
 
     # Sidebar: Azure cost estimate
     render_cost_estimator(page_count=page_count, current_page=int(page_number))

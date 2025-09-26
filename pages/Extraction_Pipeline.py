@@ -2,22 +2,23 @@ from __future__ import annotations
 
 """Extraction Pipeline page
 
-Single‑file pipeline:
+What this page does
 - Upload a PDF
-- Paste/upload page classifications (from LLM using the provided prompts)
-- Plan 1040 Main Page1/Page2 routing
-- Run Azure 1040 on paired or single pages (others skipped)
-- Produce a single JSON output with metadata and fields
+- Paste/upload page classifications (from your LLM using the prompts in the repo)
+- Plan 1040 routing: pairs Main Pg1/Pg2, runs Schedule 1 individually
+- Run Azure 1040 models only on the planned pages
+- Produce one JSON output with metadata and Azure document.fields
 
 Notes
-- Reuses azure_service helpers and shared UI utilities to minimize duplication.
-- Does NOT perform LLM calls; expects classifications from the user/prompt executor.
+- Uses app.services.azure_service helpers and shared UI utilities.
+- Does NOT call LLMs for Classification; it expects you to provide classifications.
+- Supported labels: "1040_Main_Pg1", "1040_Main_Pg2", and "1040_Schedule_1" (others are skipped).
 """
 
 import hashlib
 import json
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from time import perf_counter
@@ -98,6 +99,8 @@ class PagePlan:
     job_id: Optional[str]
     action: str  # "analyze" | "skip"
     model_id: Optional[str] = None  # model selected for this page (if any)
+
+
 
 
 # -----------------------------
@@ -273,6 +276,9 @@ def _build_plan_1040(classified: List[ClassifiedPage]) -> Tuple[List[AzureJob], 
     return azure_jobs, page_plan
 
 
+ 
+
+
 def _compose_output(
     *,
     file_name: str,
@@ -350,7 +356,7 @@ def _compose_output(
     run_id = f"run_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     out = {
         "run_id": run_id,
-        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         "files": [
             {
                 "file_name": file_name,
@@ -542,6 +548,7 @@ def run() -> None:
             "classify_ms": int(t_clf * 1000),
             "plan_ms": int(t_plan * 1000),
             "azure_api_ms_total": int(api_total * 1000),
+            "timestamp": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
             "job_timings": job_timings,
         })
 
