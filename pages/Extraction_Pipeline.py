@@ -5,14 +5,14 @@ from __future__ import annotations
 What this page does
 - Upload a PDF
 - Paste/upload page classifications (from your LLM using the prompts in the repo)
-- Plan 1040 routing: pairs Main Pg1/Pg2, runs Schedule 1 individually
+- Plan 1040 routing: pairs Main Pg1/Pg2, runs Schedule 1 and Schedule A individually
 - Run Azure 1040 models only on the planned pages
 - Produce one JSON output with metadata and Azure document.fields
 
 Notes
 - Uses app.services.azure_service helpers and shared UI utilities.
 - Does NOT call LLMs for Classification; it expects you to provide classifications.
-- Supported labels: "1040_Main_Pg1", "1040_Main_Pg2", and "1040_Schedule_1" (others are skipped).
+- Supported labels: "1040_Main_Pg1", "1040_Main_Pg2", "1040_Schedule_1", and "1040_Schedule_A" (others are skipped).
 """
 
 import hashlib
@@ -147,6 +147,8 @@ def _select_model_for_page(label: str, family: str | None) -> Optional[str]:
             return AZURE_CONFIG.get("model_id_1040", "prebuilt-tax.us.1040")
         if label == "1040_Schedule_1":
             return AZURE_CONFIG.get("model_id_1040_schedule1", "prebuilt-tax.us.1040Schedule1")
+        if label == "1040_Schedule_A":
+            return AZURE_CONFIG.get("model_id_1040_schedule_a", "prebuilt-tax.us.1040ScheduleA")
     return None
 
 
@@ -154,12 +156,13 @@ def _build_plan_1040(classified: List[ClassifiedPage]) -> Tuple[List[AzureJob], 
     file_name = classified[0].file_name if classified else "file.pdf"
     model_id = AZURE_CONFIG.get("model_id_1040", "prebuilt-tax.us.1040")
 
-    # Separate 1040 main pages and Schedule 1 from others
+    # Separate 1040 main pages and Schedule 1 / Schedule A from others
     p1_pages: List[int] = [c.page for c in classified if c.label == "1040_Main_Pg1"]
     p2_pages: List[int] = [c.page for c in classified if c.label == "1040_Main_Pg2"]
     sch1_pages: List[int] = [c.page for c in classified if c.label == "1040_Schedule_1"]
+    scha_pages: List[int] = [c.page for c in classified if c.label == "1040_Schedule_A"]
     other_pages: List[ClassifiedPage] = [
-        c for c in classified if c.label not in ("1040_Main_Pg1", "1040_Main_Pg2", "1040_Schedule_1")
+        c for c in classified if c.label not in ("1040_Main_Pg1", "1040_Main_Pg2", "1040_Schedule_1", "1040_Schedule_A")
     ]
 
     p1_pages_sorted = sorted(p1_pages)
@@ -241,6 +244,20 @@ def _build_plan_1040(classified: List[ClassifiedPage]) -> Tuple[List[AzureJob], 
                 PagePlan(page=p, label="1040_Schedule_1", status="schedule1", pair_number=pair_number, group_id=group_id, job_id=job_id, action="analyze", model_id=model_id_sch1)
             )
 
+    # 1040 Schedule A: create single-page jobs using schedule A model
+    if scha_pages:
+        model_id_scha = AZURE_CONFIG.get("model_id_1040_schedule_a", "prebuilt-tax.us.1040ScheduleA")
+        for p in sorted(scha_pages):
+            pair_number += 1
+            group_id = f"{file_name}#1040_SCHA#{pair_number}({p})"
+            job_id = group_id
+            azure_jobs.append(
+                AzureJob(job_id=job_id, file_name=file_name, model_id=model_id_scha, pages=str(p), reason="1040 Schedule A"),
+            )
+            page_plan.append(
+                PagePlan(page=p, label="1040_Schedule_A", status="scheduleA", pair_number=pair_number, group_id=group_id, job_id=job_id, action="analyze", model_id=model_id_scha)
+            )
+
     # Non‑1040 pages: skip
     for c in other_pages:
         page_plan.append(PagePlan(page=c.page, label=c.label, status="non_1040", pair_number=None, group_id=None, job_id=None, action="skip", model_id=_select_model_for_page(c.label, c.family)))
@@ -305,7 +322,7 @@ def _compose_output(
         azure_fields: Dict[str, Any] = {}
         error: Optional[str] = None
         if pp.action == "analyze" and azure_model:
-            if pp.status in ("paired", "schedule1"):
+            if pp.status in ("paired", "schedule1", "scheduleA"):
                 if pp.job_id in job_fields:
                     azure_fields = job_fields.get(pp.job_id, {})
             if pp.job_id in job_errors:
@@ -454,6 +471,11 @@ def run() -> None:
                 "if_family": "1040",
                 "labels": ["1040_Schedule_1"],
                 "model": AZURE_CONFIG.get("model_id_1040_schedule1", "prebuilt-tax.us.1040Schedule1"),
+            },
+            {
+                "if_family": "1040",
+                "labels": ["1040_Schedule_A"],
+                "model": AZURE_CONFIG.get("model_id_1040_schedule_a", "prebuilt-tax.us.1040ScheduleA"),
             },
         ]
     }

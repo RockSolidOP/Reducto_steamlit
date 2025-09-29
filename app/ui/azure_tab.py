@@ -176,8 +176,9 @@ class AzureTab:
             default_model_1040 = AZURE_CONFIG.get("model_id_1040", "prebuilt-tax.us.1040")
             # Include Schedule 1 as a selectable built-in option
             known_tax_models = [
-                "prebuilt-tax.us.1040",
-                AZURE_CONFIG.get("model_id_1040_schedule1", "prebuilt-tax.us.1040Schedule1"),
+                "prebuilt-tax.us.1040",  # Main 1040
+                AZURE_CONFIG.get("model_id_1040_schedule1", "prebuilt-tax.us.1040Schedule1"),  # Schedule 1
+                AZURE_CONFIG.get("model_id_1040_schedule_a", "prebuilt-tax.us.1040ScheduleA"),  # Schedule A
                 "Custom…",
             ]
             prev_model = state.azure_1040_model or default_model_1040
