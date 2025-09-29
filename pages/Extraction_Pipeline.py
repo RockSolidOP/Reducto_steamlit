@@ -150,32 +150,6 @@ def _select_model_for_page(label: str, family: str | None) -> Optional[str]:
     return None
 
 
-def _parse_classifications_text(text: str, *, file_name: str) -> List[ClassifiedPage]:
-    data = json.loads(text)
-    if not isinstance(data, list):
-        raise ValueError("Classification JSON must be a list of page objects")
-    out: List[ClassifiedPage] = []
-    for item in data:
-        if not isinstance(item, dict):
-            continue
-        pg = int(item.get("page"))
-        lbl = str(item.get("label") or "Other").strip()
-        fam = str(item.get("family") or _infer_family(lbl))
-        out.append(
-            ClassifiedPage(
-                file_name=str(item.get("file_name") or file_name),
-                page=pg,
-                label=lbl,
-                family=fam,
-                confidence=(float(item["confidence"]) if "confidence" in item else None),
-                reasons=(list(item["reasons"]) if isinstance(item.get("reasons"), list) else None),
-            )
-        )
-    # sort by page
-    out.sort(key=lambda x: x.page)
-    return out
-
-
 def _build_plan_1040(classified: List[ClassifiedPage]) -> Tuple[List[AzureJob], List[PagePlan]]:
     file_name = classified[0].file_name if classified else "file.pdf"
     model_id = AZURE_CONFIG.get("model_id_1040", "prebuilt-tax.us.1040")

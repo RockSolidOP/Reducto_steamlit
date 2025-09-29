@@ -70,11 +70,6 @@ class AppState:
         object.__setattr__(self, name, value)
         self._ss[name] = value
 
-    def to_dict(self) -> dict[str, Any]:
-        """Return a dictionary snapshot of the current app state values."""
-        return {k: getattr(self, k) for k in _KEYS}
-
-
 def get_state() -> AppState:
     """Ensure defaults in Streamlit session_state and return a typed AppState view."""
     ss = st.session_state

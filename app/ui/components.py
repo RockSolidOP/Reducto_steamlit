@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from contextlib import contextmanager
 from typing import Any, Dict, Iterable, Optional
 
 import streamlit as st
@@ -29,41 +28,6 @@ def fmt_duration(seconds: float | int | None) -> str:
         return f"{int(m)}m {r:.1f}s"
     h, m = divmod(int(m), 60)
     return f"{h}h {m}m {r:.0f}s"
-
-
-def section(title: str) -> None:
-    """Render a visually distinct section header for the UI."""
-    st.markdown(f"### {title}")
-
-
-@contextmanager
-def status_block(label: str):
-    """Context manager wrapper around Streamlit's status block.
-
-    Yields the underlying status object so callers can update state/label.
-    """
-    with st.status(label, expanded=False) as _status:
-        yield _status
-
-
-def error_block(exc: Exception, tb_str: str) -> None:
-    """Render a standardized error message with an expandable traceback.
-
-    - exc: the original exception object
-    - tb_str: full traceback string captured with traceback.format_exc()
-    """
-    st.error("An error occurred.")
-    st.code(f"{type(exc).__name__}: {exc}")
-    with st.expander("Full traceback"):
-        st.exception(tb_str)
-
-
-def kv_table(data: Dict[str, Any] | None) -> None:
-    """Render a small key-value mapping.
-
-    Falls back to an empty object if data is None.
-    """
-    st.json(data or {})
 
 
 def file_uploader(label: str = "Upload a PDF (saved locally)", *, types: Optional[Iterable[str]] = ("pdf",)):
@@ -151,4 +115,3 @@ def pages_list_from_spec(spec: str | None, total_pages: int) -> list[int]:
             except ValueError:
                 continue
     return sorted(pages)
-

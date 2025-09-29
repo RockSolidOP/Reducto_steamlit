@@ -3,9 +3,9 @@ from __future__ import annotations
 import os
 import re
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Iterable, List, Dict, Any
+from typing import List, Dict, Any
 
 
 def get_uploads_dir() -> Path:
@@ -42,11 +42,6 @@ def save_uploaded_file(uploaded_file) -> Path:
     path = uploads / final_name
     path.write_bytes(uploaded_file.read())
     return path
-
-
-def list_uploaded_files() -> Iterable[Path]:
-    uploads = get_uploads_dir()
-    return sorted(uploads.glob("*"))
 
 
 def dir_size_bytes(path: Path | None = None) -> int:
@@ -156,4 +151,3 @@ def cleanup_uploads(
         "remaining_count": len(entries),
         "remaining_size_bytes": int(sum(e["size"] for e in entries if e["path"].exists())),
     }
-

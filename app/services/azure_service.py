@@ -40,15 +40,6 @@ def create_docint_client() -> DocumentIntelligenceClient:
         raise RuntimeError("AZURE_DOC_AI_ENDPOINT or AZURE_DOC_AI_KEY not set in .env")
     return DocumentIntelligenceClient(endpoint=endpoint, credential=AzureKeyCredential(key))
 
-
-def parse_with_azure_old(file_path: Path):
-    """Run Azure Doc AI prebuilt-document model and return the result object."""
-    client = create_azure_client()
-    with open(file_path, "rb") as f:
-        poller = client.begin_analyze_document("prebuilt-document", document=f)
-    return poller.result()
-
-
 def parse_with_azure(
     file_path: Path,
     page_number: int | None = None,
