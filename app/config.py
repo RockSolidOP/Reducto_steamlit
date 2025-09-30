@@ -46,6 +46,8 @@ AZURE_CONFIG = {
     "model_id_1040_schedule1": "prebuilt-tax.us.1040Schedule1",
     # Prebuilt model for US IRS Form 1040 Schedule A (Itemized Deductions)
     "model_id_1040_schedule_a": "prebuilt-tax.us.1040ScheduleA",
+    # Prebuilt model for US IRS Form 1040 Schedule C (Profit or Loss From Business)
+    "model_id_1040_schedule_c": "prebuilt-tax.us.1040ScheduleC",
 }
 
 
