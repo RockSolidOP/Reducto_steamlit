@@ -5,14 +5,14 @@ from __future__ import annotations
 What this page does
 - Upload a PDF
 - Paste/upload page classifications (from your LLM using the prompts in the repo)
-- Plan 1040 routing: pairs Main Pg1/Pg2, runs Schedule 1, Schedule A, and Schedule C individually
+- Plan 1040 routing: pairs Main Pg1/Pg2 and Schedule E Pg1/Pg2; runs Schedule 1, Schedule A, and Schedule C individually
 - Run Azure 1040 models only on the planned pages
 - Produce one JSON output with metadata and Azure document.fields
 
 Notes
 - Uses app.services.azure_service helpers and shared UI utilities.
 - Does NOT call LLMs for Classification; it expects you to provide classifications.
-- Supported labels: "1040_Main_Pg1", "1040_Main_Pg2", "1040_Schedule_1", "1040_Schedule_A", and "1040_Schedule_C" (others are skipped).
+- Supported labels: "1040_Main_Pg1", "1040_Main_Pg2", "1040_Schedule_E_PG_1", "1040_Schedule_E_PG_2", "1040_Schedule_1", "1040_Schedule_A", and "1040_Schedule_C" (others are skipped).
 """
 
 import hashlib
@@ -145,6 +145,8 @@ def _select_model_for_page(label: str, family: str | None) -> Optional[str]:
     if fam == "1040":
         if label in ("1040_Main_Pg1", "1040_Main_Pg2"):
             return AZURE_CONFIG.get("model_id_1040", "prebuilt-tax.us.1040")
+        if label in ("1040_Schedule_E_PG_1", "1040_Schedule_E_PG_2"):
+            return AZURE_CONFIG.get("model_id_1040_schedule_e", "prebuilt-tax.us.1040ScheduleE")
         if label == "1040_Schedule_1":
             return AZURE_CONFIG.get("model_id_1040_schedule1", "prebuilt-tax.us.1040Schedule1")
         if label == "1040_Schedule_A":
@@ -164,12 +166,27 @@ def _build_plan_1040(classified: List[ClassifiedPage]) -> Tuple[List[AzureJob], 
     sch1_pages: List[int] = [c.page for c in classified if c.label == "1040_Schedule_1"]
     scha_pages: List[int] = [c.page for c in classified if c.label == "1040_Schedule_A"]
     schc_pages: List[int] = [c.page for c in classified if c.label == "1040_Schedule_C"]
+    se_p1_pages: List[int] = [c.page for c in classified if c.label == "1040_Schedule_E_PG_1"]
+    se_p2_pages: List[int] = [c.page for c in classified if c.label == "1040_Schedule_E_PG_2"]
     other_pages: List[ClassifiedPage] = [
-        c for c in classified if c.label not in ("1040_Main_Pg1", "1040_Main_Pg2", "1040_Schedule_1", "1040_Schedule_A", "1040_Schedule_C")
+        c
+        for c in classified
+        if c.label
+        not in (
+            "1040_Main_Pg1",
+            "1040_Main_Pg2",
+            "1040_Schedule_E_PG_1",
+            "1040_Schedule_E_PG_2",
+            "1040_Schedule_1",
+            "1040_Schedule_A",
+            "1040_Schedule_C",
+        )
     ]
 
     p1_pages_sorted = sorted(p1_pages)
     p2_pages_sorted = sorted(p2_pages)
+    se_p1_sorted = sorted(se_p1_pages)
+    se_p2_sorted = sorted(se_p2_pages)
 
     azure_jobs: List[AzureJob] = []
     page_plan: List[PagePlan] = []
@@ -177,6 +194,8 @@ def _build_plan_1040(classified: List[ClassifiedPage]) -> Tuple[List[AzureJob], 
     # Track unmatched pages
     unmatched_p1: List[int] = []
     unmatched_p2: List[int] = []
+    unmatched_se_p1: List[int] = []
+    unmatched_se_p2: List[int] = []
     pair_number = 0
 
     # Walk through all pages in ascending order and greedily pair
@@ -214,6 +233,39 @@ def _build_plan_1040(classified: List[ClassifiedPage]) -> Tuple[List[AzureJob], 
             else:
                 unmatched_p1.append(p)
 
+    # Pair Schedule E pages similarly (Pg1/Pg2)
+    model_id_se = AZURE_CONFIG.get("model_id_1040_schedule_e", "prebuilt-tax.us.1040ScheduleE")
+    all_se = sorted([(p, 1) for p in se_p1_sorted] + [(p, 2) for p in se_p2_sorted])
+    for p, kind in all_se:
+        if kind == 2:  # Pg2
+            if unmatched_se_p1:
+                pg1 = unmatched_se_p1.pop(0)
+                pair_number += 1
+                group_id = f"{file_name}#1040_SE#{pair_number}({pg1},{p})"
+                job_id = group_id
+                a, b = (pg1, p) if pg1 <= p else (p, pg1)
+                azure_jobs.append(
+                    AzureJob(job_id=job_id, file_name=file_name, model_id=model_id_se, pages=f"{a}-{b}", reason="Paired 1040 Schedule E pages"),
+                )
+                page_plan.append(PagePlan(page=pg1, label="1040_Schedule_E_PG_1", status="paired", pair_number=pair_number, group_id=group_id, job_id=job_id, action="analyze", model_id=model_id_se))
+                page_plan.append(PagePlan(page=p, label="1040_Schedule_E_PG_2", status="paired", pair_number=pair_number, group_id=group_id, job_id=job_id, action="analyze", model_id=model_id_se))
+            else:
+                unmatched_se_p2.append(p)
+        else:  # Pg1
+            if unmatched_se_p2:
+                pg2 = unmatched_se_p2.pop(0)
+                pair_number += 1
+                group_id = f"{file_name}#1040_SE#{pair_number}({p},{pg2})"
+                job_id = group_id
+                a, b = (p, pg2) if p <= pg2 else (pg2, p)
+                azure_jobs.append(
+                    AzureJob(job_id=job_id, file_name=file_name, model_id=model_id_se, pages=f"{a}-{b}", reason="Matched Schedule E Pg1 with earlier Pg2"),
+                )
+                page_plan.append(PagePlan(page=p, label="1040_Schedule_E_PG_1", status="paired", pair_number=pair_number, group_id=group_id, job_id=job_id, action="analyze", model_id=model_id_se))
+                page_plan.append(PagePlan(page=pg2, label="1040_Schedule_E_PG_2", status="paired", pair_number=pair_number, group_id=group_id, job_id=job_id, action="analyze", model_id=model_id_se))
+            else:
+                unmatched_se_p1.append(p)
+
     # Single-page jobs for any remaining unmatched (call Azure but mark as single_page_only)
     for p in unmatched_p1:
         pair_number += 1
@@ -232,6 +284,25 @@ def _build_plan_1040(classified: List[ClassifiedPage]) -> Tuple[List[AzureJob], 
             AzureJob(job_id=job_id, file_name=file_name, model_id=model_id, pages=str(p), reason="Only one 1040 main page present (single_page_only)"),
         )
         page_plan.append(PagePlan(page=p, label="1040_Main_Pg2", status="single_page_only", pair_number=pair_number, group_id=group_id, job_id=job_id, action="analyze", model_id=model_id))
+
+    # Single-page jobs for any remaining unmatched Schedule E pages
+    for p in unmatched_se_p1:
+        pair_number += 1
+        group_id = f"{file_name}#1040_SE#{pair_number}({p})"
+        job_id = group_id
+        azure_jobs.append(
+            AzureJob(job_id=job_id, file_name=file_name, model_id=model_id_se, pages=str(p), reason="Only one 1040 Schedule E page present (single_page_only)"),
+        )
+        page_plan.append(PagePlan(page=p, label="1040_Schedule_E_PG_1", status="single_page_only", pair_number=pair_number, group_id=group_id, job_id=job_id, action="analyze", model_id=model_id_se))
+
+    for p in unmatched_se_p2:
+        pair_number += 1
+        group_id = f"{file_name}#1040_SE#{pair_number}({p})"
+        job_id = group_id
+        azure_jobs.append(
+            AzureJob(job_id=job_id, file_name=file_name, model_id=model_id_se, pages=str(p), reason="Only one 1040 Schedule E page present (single_page_only)"),
+        )
+        page_plan.append(PagePlan(page=p, label="1040_Schedule_E_PG_2", status="single_page_only", pair_number=pair_number, group_id=group_id, job_id=job_id, action="analyze", model_id=model_id_se))
 
     # 1040 Schedule 1: create single-page jobs using schedule 1 model
     if sch1_pages:
@@ -483,6 +554,11 @@ def run() -> None:
                 "if_family": "1040",
                 "labels": ["1040_Main_Pg1", "1040_Main_Pg2"],
                 "model": AZURE_CONFIG.get("model_id_1040", "prebuilt-tax.us.1040"),
+            },
+            {
+                "if_family": "1040",
+                "labels": ["1040_Schedule_E_PG_1", "1040_Schedule_E_PG_2"],
+                "model": AZURE_CONFIG.get("model_id_1040_schedule_e", "prebuilt-tax.us.1040ScheduleE"),
             },
             {
                 "if_family": "1040",
