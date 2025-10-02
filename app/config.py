@@ -48,6 +48,9 @@ AZURE_CONFIG = {
     "model_id_1040_schedule_a": "prebuilt-tax.us.1040ScheduleA",
     # Prebuilt model for US IRS Form 1040 Schedule C (Profit or Loss From Business)
     "model_id_1040_schedule_c": "prebuilt-tax.us.1040ScheduleC",
+    # Prebuilt model for US IRS Form 1040 Schedule E (Starter placeholder)
+    # Note: This model id may not exist in all regions/tenants.
+    "model_id_1040_schedule_e": "prebuilt-tax.us.1040ScheduleE",
 }
 
 

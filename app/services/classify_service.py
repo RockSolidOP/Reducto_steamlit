@@ -174,7 +174,7 @@ def _apply_smoothing(rows: List[dict]) -> None:
     idx = [i for i in range(len(rows)) if str(rows[i].get("predicted_label", "")).startswith("1040_Schedule_E")]
     if len(idx) >= 2:
         idx = sorted(idx, key=lambda i: rows[i]["page"])[:2]
-        rows[idx[0]]["predicted_label"] = "1040_Schedule_E"
+        rows[idx[0]]["predicted_label"] = "1040_Schedule_E_PG_1"
         rows[idx[1]]["predicted_label"] = "1040_Schedule_E_PG_2"
 
     # 8582

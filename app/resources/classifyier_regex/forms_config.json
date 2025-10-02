@@ -81,7 +81,7 @@
     { "label": "1040_Schedule_C", "family": "1040", "description": "Schedule C - Profit or Loss From Business.",
       "patterns": [ {"re": "\\bSchedule\\s*C\\s*\\(\\s*Form\\s*1040\\s*\\)\\b", "w": 3.0},
                      {"re": "Profit\\s+or\\s+Loss\\s+From\\s+Business", "w": 2.0} ] },
-    { "label": "1040_Schedule_E", "family": "1040", "description": "Schedule E - Supplemental Income and Loss (Pg 1).",
+    { "label": "1040_Schedule_E_PG_1", "family": "1040", "description": "Schedule E - Supplemental Income and Loss (Pg 1).",
       "patterns": [ {"re": "\\bSchedule\\s*E\\s*\\(\\s*Form\\s*1040\\s*\\)\\b", "w": 3.0}, {"re": "Supplemental\\s+Income\\s+and\\s+Loss", "w": 2.0} ],
       "avoid": ["U\\.?S\\.?\\s+Individual\\s+Income\\s+Tax\\s+Return", "\\bSchedule\\s*F\\s*\\(\\s*Form\\s*1040\\s*\\)\\b", "Profit\\s+or\\s+Loss\\s+From\\s+Farming"] },
     { "label": "1040_Schedule_E_PG_2", "family": "1040", "description": "Schedule E Page 2 - Parts IV/V.",

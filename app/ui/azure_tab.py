@@ -180,6 +180,7 @@ class AzureTab:
                 AZURE_CONFIG.get("model_id_1040_schedule1", "prebuilt-tax.us.1040Schedule1"),  # Schedule 1
                 AZURE_CONFIG.get("model_id_1040_schedule_a", "prebuilt-tax.us.1040ScheduleA"),  # Schedule A
                 AZURE_CONFIG.get("model_id_1040_schedule_c", "prebuilt-tax.us.1040ScheduleC"),  # Schedule C
+                AZURE_CONFIG.get("model_id_1040_schedule_e", "prebuilt-tax.us.1040ScheduleE"),  # Schedule E (starter)
                 "Custom…",
             ]
             prev_model = state.azure_1040_model or default_model_1040
@@ -220,6 +221,12 @@ class AzureTab:
                     # Validate pages spec against document bounds (no fallback)
                     page_count = int(st.session_state.get("page_count_ui", 1))
                     pages_for_azure: str | None = None
+                    # Starter (revised): If Schedule E model is selected, honor user-entered pages if provided;
+                    # otherwise default to "1-2".
+                    schedule_e_model = AZURE_CONFIG.get("model_id_1040_schedule_e", "prebuilt-tax.us.1040ScheduleE")
+                    if model_1040 == schedule_e_model and not pages_1040.strip():
+                        pages_for_azure = "1-2"
+                        st.info("Schedule E model selected — no pages entered, defaulting to '1-2'.")
                     if pages_1040.strip():
                         spec = pages_1040.strip()
                         # Remove whitespace around commas
