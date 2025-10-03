@@ -224,6 +224,35 @@ class ReductoTab:
 
         # --- Schema Extract tab (no preprocessors) ---
         with tab_schema:
+            # Optional: Page range controls local to Schema Extract
+            st.markdown("#### Page Range (Schema Extract)")
+            s_col, e_col = st.columns(2)
+            with s_col:
+                schema_start = st.number_input(
+                    "Start page",
+                    min_value=1,
+                    max_value=max(1, int(st.session_state.get("page_count_ui", 1))),
+                    value=int(
+                        st.session_state.get("schema_start_tab")
+                        or st.session_state.get("red_start_tab")
+                        or st.session_state.get("page_number_ui", 1)
+                    ),
+                    step=1,
+                    key="schema_start_tab",
+                )
+            with e_col:
+                schema_end = st.number_input(
+                    "End page",
+                    min_value=1,
+                    max_value=max(1, int(st.session_state.get("page_count_ui", 1))),
+                    value=int(
+                        st.session_state.get("schema_end_tab")
+                        or st.session_state.get("red_end_tab")
+                        or st.session_state.get("page_number_ui", 1)
+                    ),
+                    step=1,
+                    key="schema_end_tab",
+                )
             # Discover schemas from app-bundled resources folder
             resources_dir = Path(__file__).resolve().parents[1] / "resources" / "reducto_schema"
             try:
@@ -462,7 +491,7 @@ class ReductoTab:
             with run_col1:
                 run_schema = st.button("Run Schema Extraction", type="primary", key="btn_run_schema_extract")
             with run_col2:
-                st.caption("Uses Start/End from the Simple Extract tab above.")
+                st.caption("Uses Start/End set in this tab.")
 
             if run_schema:
                 try:
@@ -474,9 +503,17 @@ class ReductoTab:
                         st.exception(traceback.format_exc())
                     st.stop()
 
-                # Resolve page range from tab inputs only
-                s_page = int(st.session_state.get("red_start_tab") or st.session_state.get("page_number_ui", 1))
-                e_page = int(st.session_state.get("red_end_tab") or s_page)
+                # Resolve page range: prefer Schema tab inputs; fall back to Simple Extract or current page
+                s_page = int(
+                    st.session_state.get("schema_start_tab")
+                    or st.session_state.get("red_start_tab")
+                    or st.session_state.get("page_number_ui", 1)
+                )
+                e_page = int(
+                    st.session_state.get("schema_end_tab")
+                    or st.session_state.get("red_end_tab")
+                    or s_page
+                )
 
                 # Resolve current PDF path from state
                 pdf_path = st.session_state.get("uploaded_pdf_path") or st.session_state.get("pdf_path")
