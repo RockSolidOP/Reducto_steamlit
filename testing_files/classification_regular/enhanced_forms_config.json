@@ -1,0 +1,95 @@
+{
+  "name": "enhanced_reducto_form_labels",
+  "description": "Expanded regex coverage for FinCEN FBAR packets and IRS 1040 material.",
+  "weights": {
+    "header": 1.5,
+    "body": 1.0,
+    "footer": 1.1
+  },
+  "families": [
+    {
+      "name": "Other",
+      "patterns": [
+        "Trial System",
+        "Fname\\s+&\\s+Spouse"
+      ],
+      "avoid": [
+        "FinCEN",
+        "Form\\s*114"
+      ]
+    },
+    {
+      "name": "Filing Instructions",
+      "patterns": [
+        "\\bFiling\\s+Instructions\\b",
+        "Do not mail the attached Form"
+      ]
+    },
+    {
+      "name": "FinCEN 114",
+      "patterns": [
+        "\\bFinCEN\\s*Form\\s*114\\b",
+        "Report\\s+of\\s+Foreign\\s+Bank",
+        "Taxable\\s+Year\\s+Ended"
+      ],
+      "must": [
+        "\\bFinCEN\\s*Form\\s*114\\b"
+      ]
+    },
+    {
+      "name": "FinCEN 114a",
+      "patterns": [
+        "\\bForm\\s*114a\\b",
+        "Record\\s+of\\s+Authorization\\s+to\\s+Electronically\\s+File\\s+FBARs",
+        "FINANCIAL\\s+CRIMES\\s+ENFORCEMENT\\s+NETWORK"
+      ]
+    }
+  ],
+  "labels": [
+    {
+      "label": "Cover_Page",
+      "family": "Other",
+      "description": "Generic cover sheet or mailing slip.",
+      "patterns": [
+        "Trial System\\s+-\\s+To print your firm",
+        "Fname\\s+\\&\\s+Spouse"
+      ]
+    },
+    {
+      "label": "FBAR_Filing_Instructions",
+      "family": "Filing Instructions",
+      "description": "FBAR filing instruction sheet.",
+      "patterns": [
+        "\\bFiling\\s+Instructions\\b",
+        "FinCEN\\s+Form\\s+114",
+        "Must\\s+be\\s+electronically\\s+filed"
+      ],
+      "avoid": [
+        "Record\\s+of\\s+Authorization"
+      ]
+    },
+    {
+      "label": "FinCEN_114a_Record",
+      "family": "FinCEN 114a",
+      "description": "FinCEN Form 114a Record of Authorization page.",
+      "patterns": [
+        "\\bForm\\s*114a\\b",
+        "Record\\s+of\\s+Authorization\\s+to\\s+Electronically\\s+File\\s+FBARs",
+        "Do not send to FinCEN"
+      ]
+    },
+    {
+      "label": "FinCEN_114_Report",
+      "family": "FinCEN 114",
+      "description": "FinCEN Form 114 worksheet or data page.",
+      "patterns": [
+        "\\bFINCEN\\s*FORM\\s*114\\b",
+        "Report\\s+of\\s+Foreign\\s+Bank",
+        "Financial\\s+accounts"
+      ]
+    }
+  ],
+  "smoothing": {
+    "enable": false
+  }
+}

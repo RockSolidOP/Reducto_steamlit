@@ -1,0 +1,228 @@
+{
+  "document": "sample_multiple.pdf",
+  "config": "forms_config_enhanced",
+  "total_pages": 44,
+  "pages": [
+    {
+      "page": 1,
+      "family": "Other",
+      "label": "Other"
+    },
+    {
+      "page": 2,
+      "family": "Other",
+      "label": "Filing_Instructions"
+    },
+    {
+      "page": 3,
+      "family": "114a",
+      "label": "114a_Record_of_Authorization_to_Electronically_File_FBARs"
+    },
+    {
+      "page": 4,
+      "family": "Other",
+      "label": "Filing_Instructions"
+    },
+    {
+      "page": 5,
+      "family": "114a",
+      "label": "114a_Record_of_Authorization_to_Electronically_File_FBARs"
+    },
+    {
+      "page": 6,
+      "family": "FinCEN 114",
+      "label": "FinCEN_114_Report_of_Foreign_Bank_and_Financial_Accounts,_Pg_1"
+    },
+    {
+      "page": 7,
+      "family": "FinCEN 114",
+      "label": "FinCEN_114_Report_of_Foreign_Bank_and_Financial_Accounts,_Pg_2"
+    },
+    {
+      "page": 8,
+      "family": "FinCEN 114",
+      "label": "FinCEN_114_Report_of_Foreign_Bank_and_Financial_Accounts,_Pg_3"
+    },
+    {
+      "page": 9,
+      "family": "FinCEN 114",
+      "label": "FinCEN_114_Report_of_Foreign_Bank_and_Financial_Accounts,_Pg_5"
+    },
+    {
+      "page": 10,
+      "family": "FinCEN 114",
+      "label": "FinCEN_114_Report_of_Foreign_Bank_and_Financial_Accounts,_Pg_1"
+    },
+    {
+      "page": 11,
+      "family": "FinCEN 114",
+      "label": "FinCEN_114_Report_of_Foreign_Bank_and_Financial_Accounts,_Pg_2"
+    },
+    {
+      "page": 12,
+      "family": "FinCEN 114",
+      "label": "FinCEN_114_Report_of_Foreign_Bank_and_Financial_Accounts,_Pg_3"
+    },
+    {
+      "page": 13,
+      "family": "FinCEN 114",
+      "label": "FinCEN_114_Report_of_Foreign_Bank_and_Financial_Accounts,_Pg_5"
+    },
+    {
+      "page": 14,
+      "family": "Other",
+      "label": "Other"
+    },
+    {
+      "page": 15,
+      "family": "Other",
+      "label": "Other"
+    },
+    {
+      "page": 16,
+      "family": "Other",
+      "label": "Filing_Instructions"
+    },
+    {
+      "page": 17,
+      "family": "Other",
+      "label": "Other"
+    },
+    {
+      "page": 18,
+      "family": "1040",
+      "label": "1040_Main_Pg1"
+    },
+    {
+      "page": 19,
+      "family": "1040",
+      "label": "1040_Main_Pg2"
+    },
+    {
+      "page": 20,
+      "family": "1040",
+      "label": "1040_Schedule_1"
+    },
+    {
+      "page": 21,
+      "family": "1040",
+      "label": "1040_Schedule_A"
+    },
+    {
+      "page": 22,
+      "family": "1040",
+      "label": "1040_Schedule_C"
+    },
+    {
+      "page": 23,
+      "family": "1040",
+      "label": "1040_Schedule_E_PG_1"
+    },
+    {
+      "page": 24,
+      "family": "1040",
+      "label": "1040_Schedule_E_PG_2"
+    },
+    {
+      "page": 25,
+      "family": "1040",
+      "label": "1040_Schedule_F"
+    },
+    {
+      "page": 26,
+      "family": "Form 5329",
+      "label": "Form_5329_Pg_1"
+    },
+    {
+      "page": 27,
+      "family": "Form 5329",
+      "label": "Form_5329_Pg_2"
+    },
+    {
+      "page": 28,
+      "family": "Form 5329",
+      "label": "Form_5329_Pg_3"
+    },
+    {
+      "page": 29,
+      "family": "Form 6251",
+      "label": "Form_6251"
+    },
+    {
+      "page": 30,
+      "family": "Form 6252",
+      "label": "Form_6252"
+    },
+    {
+      "page": 31,
+      "family": "Form 6252",
+      "label": "Form_6252"
+    },
+    {
+      "page": 32,
+      "family": "Form 6252",
+      "label": "Form_6252"
+    },
+    {
+      "page": 33,
+      "family": "Form 6252",
+      "label": "Form_6252"
+    },
+    {
+      "page": 34,
+      "family": "Form 6252",
+      "label": "Form_6252"
+    },
+    {
+      "page": 35,
+      "family": "Form 6252",
+      "label": "Form_6252"
+    },
+    {
+      "page": 36,
+      "family": "Form 6252",
+      "label": "Form_6252"
+    },
+    {
+      "page": 37,
+      "family": "Other",
+      "label": "Other"
+    },
+    {
+      "page": 38,
+      "family": "Other",
+      "label": "Other"
+    },
+    {
+      "page": 39,
+      "family": "Form 8582",
+      "label": "Form_8582_Pg_1"
+    },
+    {
+      "page": 40,
+      "family": "Form 8582",
+      "label": "Form_8582_Pg_2"
+    },
+    {
+      "page": 41,
+      "family": "Form 8582",
+      "label": "Form_8582_Pg_1"
+    },
+    {
+      "page": 42,
+      "family": "Form 8582",
+      "label": "Form_8582_Pg_2"
+    },
+    {
+      "page": 43,
+      "family": "Form 6252",
+      "label": "Federal_Statements_Form_6252_Line_29e"
+    },
+    {
+      "page": 44,
+      "family": "Form 6252",
+      "label": "Federal_Statements_Form_6252_Line_29e"
+    }
+  ],
+  "smoothing_applied": true
+}

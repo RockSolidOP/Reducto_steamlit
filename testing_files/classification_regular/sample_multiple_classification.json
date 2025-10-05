@@ -1,0 +1,228 @@
+{
+  "document": "sample_multiple.pdf",
+  "config": "enhanced_reducto_form_labels",
+  "total_pages": 44,
+  "pages": [
+    {
+      "page": 1,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 2,
+      "family": "FinCEN 114",
+      "label": "FinCEN_114_Report"
+    },
+    {
+      "page": 3,
+      "family": "FinCEN 114a",
+      "label": "FinCEN_114a_Record"
+    },
+    {
+      "page": 4,
+      "family": "FinCEN 114",
+      "label": "FinCEN_114_Report"
+    },
+    {
+      "page": 5,
+      "family": "FinCEN 114a",
+      "label": "FinCEN_114a_Record"
+    },
+    {
+      "page": 6,
+      "family": "Other",
+      "label": "Other"
+    },
+    {
+      "page": 7,
+      "family": "Other",
+      "label": "Other"
+    },
+    {
+      "page": 8,
+      "family": "Other",
+      "label": "Other"
+    },
+    {
+      "page": 9,
+      "family": "FinCEN 114a",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 10,
+      "family": "Other",
+      "label": "Other"
+    },
+    {
+      "page": 11,
+      "family": "Other",
+      "label": "Other"
+    },
+    {
+      "page": 12,
+      "family": "Other",
+      "label": "Other"
+    },
+    {
+      "page": 13,
+      "family": "FinCEN 114a",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 14,
+      "family": "FinCEN 114",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 15,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 16,
+      "family": "Filing Instructions",
+      "label": "FBAR_Filing_Instructions"
+    },
+    {
+      "page": 17,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 18,
+      "family": "Other",
+      "label": "Other"
+    },
+    {
+      "page": 19,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 20,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 21,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 22,
+      "family": "Other",
+      "label": "Other"
+    },
+    {
+      "page": 23,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 24,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 25,
+      "family": "Other",
+      "label": "Other"
+    },
+    {
+      "page": 26,
+      "family": "Other",
+      "label": "Other"
+    },
+    {
+      "page": 27,
+      "family": "Other",
+      "label": "Other"
+    },
+    {
+      "page": 28,
+      "family": "Other",
+      "label": "Other"
+    },
+    {
+      "page": 29,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 30,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 31,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 32,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 33,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 34,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 35,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 36,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 37,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 38,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 39,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 40,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 41,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 42,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 43,
+      "family": "Other",
+      "label": "Cover_Page"
+    },
+    {
+      "page": 44,
+      "family": "Other",
+      "label": "Cover_Page"
+    }
+  ],
+  "smoothing_applied": false
+}
