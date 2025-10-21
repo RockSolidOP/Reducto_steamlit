@@ -25,8 +25,7 @@ import streamlit as st
 
 # Ensure project root is on sys.path when running this page directly
 try:  # noqa: SIM105 - deliberate try/except import shim
-    from app.config import AZURE_CONFIG
-    from app.services.azure_service import parse_with_azure, parse_with_azure_docint, azure_to_dict
+    from app.services.azure_service import parse_with_azure_docint, azure_to_dict
     from app.services.ml_classify_service import classify_document_ml
     from app.config_classifier_ml_labels import ML_LABEL_MODEL_MAP, SKIP_LABELS
 except ModuleNotFoundError:  # Running via `streamlit run pages/Extraction_Pipeline.py`
@@ -36,8 +35,7 @@ except ModuleNotFoundError:  # Running via `streamlit run pages/Extraction_Pipel
     _ROOT = _Path(__file__).resolve().parents[1]
     if str(_ROOT) not in _sys.path:
         _sys.path.insert(0, str(_ROOT))
-    from app.config import AZURE_CONFIG
-    from app.services.azure_service import parse_with_azure, parse_with_azure_docint, azure_to_dict
+    from app.services.azure_service import parse_with_azure_docint, azure_to_dict
     from app.services.ml_classify_service import classify_document_ml
     from app.config_classifier_ml_labels import ML_LABEL_MODEL_MAP, SKIP_LABELS
 from app.ui.components import download_json_button, file_uploader
@@ -84,61 +82,16 @@ class PagePlan:
 # Helpers
 # -----------------------------
 
-def _infer_base_label(label: str) -> str:
-    import re
-    n = re.sub(r"[^a-z0-9]+", "_", (label or "").lower())
-    if "form_1040" in n or n.startswith("1040"):
-        return "1040"
-    if "fincen_114" in n or "fincen" in n:
-        return "FinCEN 114"
-    if "114a" in n:
-        return "114a"
-    if "5329" in n:
-        return "Form 5329"
-    if "6251" in n:
-        return "Form 6251"
-    if "6252" in n:
-        return "Form 6252"
-    if "8582" in n:
-        return "Form 8582"
-    if "8801" in n:
-        return "Form 8801"
-    if "schedule_" in n:
-        return "1040"
-    return "Other"
+# No fallback inference: base_label is taken from ML output or defaults to "Other".
 
 
 ## (removed) canonical mapping — we use raw ML labels end-to-end now.
 
 def _select_model_for_page(label: str, base_label: Optional[str]) -> Optional[str]:
-    """Return model id for a page based on its ML label (exact map first)."""
-    try:
-        # Explicit skip list from configuration
-        try:
-            from app.config_classifier_ml_labels import SKIP_LABELS as _SKIP
-        except Exception:
-            _SKIP = set()
-        if label in _SKIP:
-            return None
-        model = ML_LABEL_MODEL_MAP.get(label)
-        if model:
-            return str(model)
-        # Heuristic fallback based on base_label/label
-        fam = (base_label or _infer_base_label(label)).strip()
-        n = __import__("re").sub(r"[^a-z0-9]+", "_", (label or "").lower())
-        if fam == "1040":
-            if "schedule_e" in n:
-                return AZURE_CONFIG.get("model_id_1040_schedule_e", "prebuilt-tax.us.1040ScheduleE")
-            if "schedule_a" in n:
-                return AZURE_CONFIG.get("model_id_1040_schedule_a", "prebuilt-tax.us.1040ScheduleA")
-            if "schedule_c" in n:
-                return AZURE_CONFIG.get("model_id_1040_schedule_c", "prebuilt-tax.us.1040ScheduleC")
-            if "schedule_1" in n:
-                return AZURE_CONFIG.get("model_id_1040_schedule1", "prebuilt-tax.us.1040Schedule1")
-            return AZURE_CONFIG.get("model_id_1040", "prebuilt-tax.us.1040")
-        return AZURE_CONFIG.get("model_id", "prebuilt-document")
-    except Exception:
-        return AZURE_CONFIG.get("model_id", "prebuilt-document")
+    """Return model id for a page strictly based on ML label map; else skip."""
+    if label in SKIP_LABELS:
+        return None
+    return ML_LABEL_MODEL_MAP.get(label)
 
 
 def _build_plan_generic(classified: List[ClassifiedPage]) -> Tuple[List[AzureJob], List[PagePlan]]:
@@ -149,7 +102,7 @@ def _build_plan_generic(classified: List[ClassifiedPage]) -> Tuple[List[AzureJob
     file_name = classified[0].file_name
     groups: Dict[str, List[ClassifiedPage]] = {}
     for c in sorted(classified, key=lambda x: int(x.page)):
-        bl = c.base_label or _infer_base_label(c.label)
+        bl = c.base_label or "Other"
         groups.setdefault(bl, []).append(c)
 
     import re
@@ -254,14 +207,8 @@ def _build_plan_generic(classified: List[ClassifiedPage]) -> Tuple[List[AzureJob
 
 
 def _analyze_with_azure(pdf_path: Path, *, model_id: str, pages: str) -> Any:
-    """Try Document Intelligence first; fall back to Form Recognizer client."""
-    try:
-        return parse_with_azure_docint(pdf_path, page_number=1, model_id=model_id, pages=pages)
-    except Exception as e_docint:
-        try:
-            return parse_with_azure(pdf_path, page_number=1, model_id=model_id, pages=pages)
-        except Exception as e_fr:
-            raise RuntimeError(f"Azure analyze failed: {e_docint} | {e_fr}")
+    """Run only Document Intelligence client; do not fall back."""
+    return parse_with_azure_docint(pdf_path, page_number=1, model_id=model_id, pages=pages)
 
 
 # -----------------------------
@@ -292,7 +239,7 @@ def run() -> None:
         classified = []
         for r in rows:
             raw_lbl = str(r.get("predicted_label"))
-            base_val = str(r.get("predicted_family") or r.get("base_label") or _infer_base_label(raw_lbl))
+            base_val = str(r.get("predicted_family") or r.get("base_label") or "Other")
             pif = r.get("page_in_form")
             try:
                 pif_int = int(pif) if pif is not None else None
