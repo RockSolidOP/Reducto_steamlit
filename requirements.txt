@@ -85,3 +85,11 @@ typing_extensions==4.15.0
 tzdata==2025.2
 urllib3==2.5.0
 wcwidth==0.2.13
+
+# ML classifier (FAISS + OpenCLIP)
+# Note: install CPU builds; on Apple Silicon use pip wheels. 
+# If versions cause conflicts in your environment, adjust pins as needed.
+open-clip-torch
+torch
+faiss-cpu
+pypdfium2
