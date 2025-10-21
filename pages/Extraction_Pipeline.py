@@ -282,9 +282,7 @@ def run() -> None:
     pdf_path = save_uploaded_file(uploaded)
     st.caption(f"Saved: {pdf_path}")
 
-    # Page count
-    with fitz.open(pdf_path) as doc:
-        page_count = doc.page_count
+    # Optional: open for validation if needed (currently not used)
 
     # Run classifier on all pages (ML classifier only)
     try:
@@ -362,7 +360,6 @@ def run() -> None:
 
         # Execute Azure jobs
         azure_results: Dict[str, Dict[str, Any]] = {}
-        model_id = AZURE_CONFIG.get("model_id_1040", "prebuilt-tax.us.1040")
         job_timings: List[Dict[str, Any]] = []
         api_total = 0.0
         for job in azure_jobs:
