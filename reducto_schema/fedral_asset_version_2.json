@@ -1,0 +1,57 @@
+{
+  "type": "object",
+  "properties": {
+    "companyName": {"type": "string"},
+    "reportDate": {"type": "string", "format": "date"},
+    "currency": {"type": "string", "description": "ISO 4217 (e.g., USD, CAD)"},
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["assetUID","description","acquisitionDate","cost","status"],
+        "properties": {
+          "assetUID": {"type": "string", "description": "UUID v4"},
+          "assetCode": {"type": "string", "description": "Source/system ID; may repeat"},
+          "description": {"type": "string"},
+          "category": {"type": "string", "description": "Asset class or tag"},
+          "acquisitionDate": {"type": "string", "format": "date"},
+          "cost": {"type": "number"},
+          "businessUsePct": {"type": "number", "minimum": 0, "maximum": 100},
+          "section179Amount": {"type": "number", "default": 0},
+          "bonusDepreciationAmount": {"type": "number", "default": 0},
+          "basisForDepreciation": {"type": "number", "description": "cost - Sec179 - disallowances"},
+          "recoveryPeriodYears": {"type": "number"},
+          "convention": {"type": "string", "enum": ["MID_YEAR","MID_QUARTER","MID_MONTH"]},
+          "depreciationMethod": {
+            "type": "string",
+            "enum": ["MACRS_200DB","MACRS_150DB","SL","AMORTIZATION"]
+          },
+          "accumulatedDepreciation": {"type": "number"},
+          "netBookValue": {"type": "number"},
+          "status": {"type": "string", "enum": ["active","disposed","scrapped"]},
+          "disposalDate": {"type": "string", "format": "date"},
+          "disposalProceeds": {"type": "number"},
+          "notes": {"type": "string"},
+          "tags": {"type": "array", "items": {"type": "string"}}
+        },
+        "allOf": [
+          {"if": {"properties": {"status": {"const": "active"}}},
+           "then": {"properties": {"disposalDate": {"nullable": true}}}},
+          {"if": {"properties": {"status": {"enum": ["disposed","scrapped"]}}},
+           "then": {"required": ["disposalDate"]}}
+        ]
+      }
+    },
+    "totals": {
+      "type": "object",
+      "properties": {
+        "totalAssetsCount": {"type": "integer"},
+        "totalAcquisitionCost": {"type": "number"},
+        "totalCurrentDepreciation": {"type": "number"},
+        "totalAccumulatedDepreciation": {"type": "number"},
+        "totalNetBookValue": {"type": "number"}
+      }
+    }
+  },
+  "required": ["companyName","reportDate","currency","assets"]
+}

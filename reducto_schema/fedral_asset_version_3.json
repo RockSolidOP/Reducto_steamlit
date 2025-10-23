@@ -1,0 +1,112 @@
+{
+  "type": "object",
+  "properties": {
+    "headerFields": {
+      "type": "object",
+      "description": "Metadata fields identifying the form",
+      "properties": {
+        "documentTitle": {
+          "type": "string",
+          "description": "Official title of the form (e.g., Asset Depreciation Schedule)"
+        },
+        "documentDate": {
+          "type": "string",
+          "format": "date",
+          "description": "The reporting or filing date of the document"
+        },
+        "authorName": {
+          "type": "string",
+          "description": "Name of the preparer or taxpayer"
+        }
+      },
+      "required": ["documentTitle", "documentDate", "authorName"]
+    },
+    "assetList": {
+      "type": "array",
+      "description": "Flat list of all assets captured from the schedule, each row represents one asset record",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Asset label as shown in the form"
+          },
+          "assetType": {
+            "type": "string",
+            "description": "Asset category derived from the nearest bold+underlined section header above the row. If unclear, use OTHER."
+          },
+          "acquisitionDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date the asset was placed in service"
+          },
+          "cost": {
+            "type": "number",
+            "description": "Original acquisition cost"
+          },
+          "businessUsePct": {
+            "type": "number",
+            "description": "Percentage of business use (0–100)"
+          },
+          "section179Amount": {
+            "type": "number",
+            "description": "Section 179 deduction amount, if claimed"
+          },
+          "bonusDepreciationAmount": {
+            "type": "number",
+            "description": "Bonus depreciation amount, if applied"
+          },
+          "basisForDepreciation": {
+            "type": "number",
+            "description": "Adjusted basis used for depreciation"
+          },
+          "recoveryPeriodYears": {
+            "type": "number",
+            "description": "Recovery period in years"
+          },
+          "convention": {
+            "type": "string",
+            "description": "Depreciation convention (e.g., Mid-Year, Mid-Quarter)"
+          },
+          "depreciationMethod": {
+            "type": "string",
+            "description": "Method of depreciation (e.g., 200% DB, SL)"
+          },
+          "accumulatedDepreciation": {
+            "type": "number",
+            "description": "Total depreciation claimed to date"
+          },
+          "currentDepreciation": {
+            "type": "number",
+            "description": "Depreciation expense for the current year"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status of the asset (active, disposed, scrapped)"
+          },
+          "disposalDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date of disposal if applicable"
+          },
+          "disposalProceeds": {
+            "type": "number",
+            "description": "Amount received upon disposal, if applicable"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Additional notes or clarifications from the form"
+          }
+        },
+        "required": [
+          "description",
+          "assetType",
+          "acquisitionDate",
+          "cost",
+          "status"
+        ]
+      }
+    }
+  },
+  "required": ["headerFields", "assetList"]
+}

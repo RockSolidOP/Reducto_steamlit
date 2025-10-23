@@ -1,0 +1,98 @@
+{
+  "type": "object",
+  "properties": {
+    "headerFields": {
+      "type": "object",
+      "properties": {
+        "documentTitle": {
+          "type": "string",
+          "description": "Official title of the form or statement (e.g., Asset Depreciation Form 4562)."
+        },
+        "documentDate": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The filing or preparation date of the document, typically matching the tax year or reporting period."
+        },
+        "authorName": {
+          "type": "string",
+          "description": "Name of the preparer, taxpayer, or responsible party who completed the form."
+        }
+      },
+      "required": ["documentTitle", "documentDate", "authorName"],
+      "description": "Key metadata fields identifying the document’s origin and purpose."
+    },
+    "assetList": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "assetDescription": {
+            "type": "string",
+            "description": "Clear description of the asset (e.g., 'Office Laptop Dell XPS 15')."
+          },
+          "dateService": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date the asset was first placed in service and became available for business use."
+          },
+          "cost": {
+            "type": "number",
+            "description": "Original purchase cost or acquisition price of the asset."
+          },
+          "businessPercentage": {
+            "type": "number",
+            "description": "Percentage of total use attributed to business purposes (0–100%)."
+          },
+          "section179": {
+            "type": "number",
+            "description": "Portion of the cost elected for Section 179 immediate deduction."
+          },
+          "bonusDepreciation": {
+            "type": "number",
+            "description": "Additional first-year depreciation (bonus) applied under IRS rules."
+          },
+          "basisForDepreciation": {
+            "type": "number",
+            "description": "Adjusted basis of the asset used to calculate depreciation (cost minus reductions like Section 179 or business-use limits)."
+          },
+          "period": {
+            "type": "string",
+            "description": "Recovery period of the asset (e.g., 3 years, 5 years, 39 years) based on IRS asset classification."
+          },
+          "convention": {
+            "type": "string",
+            "description": "Depreciation convention applied (e.g., Mid-Quarter, Mid-Year, or Mid-Month)."
+          },
+          "method": {
+            "type": "string",
+            "description": "Depreciation method used (e.g., MACRS 200% DB, Straight Line)."
+          },
+          "priorDepreciation": {
+            "type": "number",
+            "description": "Cumulative depreciation already claimed in previous years."
+          },
+          "currentDepreciation": {
+            "type": "number",
+            "description": "Depreciation expense calculated for the current tax year."
+          }
+        },
+        "required": [
+          "assetDescription",
+          "dateService",
+          "cost",
+          "businessPercentage",
+          "section179",
+          "bonusDepreciation",
+          "basisForDepreciation",
+          "period",
+          "convention",
+          "method",
+          "priorDepreciation",
+          "currentDepreciation"
+        ]
+      },
+      "description": "Detailed schedule of assets placed in service, including acquisition, usage, and depreciation details for tax reporting."
+    }
+  },
+  "required": ["headerFields", "assetList"]
+}
