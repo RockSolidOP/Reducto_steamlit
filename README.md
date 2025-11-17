@@ -31,11 +31,20 @@ Note: The app’s Reducto client uses an explicit httpx client with `trust_env=F
 
 ## Local Setup
 
+0) (Thomson Reuters VDI / corporate VDI) Fix certificates so Python trusts system CAs (needed to connect to Reducto API):
+
+```
+pip install --upgrade certifi
+pip install pip-system-certs
+```
+
 1) Create and activate a virtualenv
 
 ```
 python -m venv .venv
 source .venv/bin/activate
+windows : .\venv\Scripts\Activate.ps1
+
 ```
 
 2) Install dependencies
